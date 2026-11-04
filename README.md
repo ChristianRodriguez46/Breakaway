@@ -80,12 +80,12 @@ npm run test:site   # checks on my site's pages; only from the copy inside my si
 My site updates itself when I push `main`. I work on the `dev` branch and merge into `main` when an update is finished. Then:
 
 1. The `tests` workflow runs the game tests.
-2. If they pass, `notify-portfolio` tells my site's repo that Breakaway's `main` changed. It uses the `PORTFOLIO_DISPATCH_TOKEN` secret.
+2. If they pass, `notify-portfolio` tells my site's repo that Breakaway's `main` changed.
 3. My site's `update-submodules` workflow moves `Projects/Breakaway` to the new `main`, runs the site checks, commits as me, pushes, and asks GitHub Pages to rebuild.
 
 Pushes to `dev` never reach the site. If any step fails, the site keeps the version it had, and GitHub emails me about the failed run.
 
-To update by hand instead (for example while the token is being renewed), I press **Run workflow** on `update-submodules` in my site's Actions tab, or run:
+To update by hand instead, I press **Run workflow** on `update-submodules` in my site's Actions tab, or run:
 
 ```bash
 cd ~/REPO/ChristianRodriguez46.github.io
