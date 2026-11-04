@@ -1,0 +1,42 @@
+# Tells my portfolio that this project's main has new, tested work. The portfolio's
+# update-submodules workflow then moves its submodule to that commit and republishes the site.
+#
+# When it runs: after the "tests" workflow passes for a push to main.
+# Pushes to dev, pull requests and failed test runs never reach the site.
+#
+# Copying this to a new project: the project needs a workflow named "tests" (see tests.yml) and
+# the PORTFOLIO_DISPATCH_TOKEN secret below. Nothing in this file names the project.
+#
+# Secret: PORTFOLIO_DISPATCH_TOKEN (Settings → Secrets and variables → Actions → New repository
+# secret). A fine-grained personal access token with access to
+# ChristianRodriguez46/ChristianRodriguez46.github.io only and the permission
+# Contents: Read and write. Every project can use the same token.
+#
+# Troubleshooting
+#   - 401 "Bad credentials": the token expired or the secret is missing. Make a new token and
+#     update the secret in each project.
+#   - 404 "Not Found": the token doesn't include the portfolio repo, or lacks Contents write.
+#   - Green here but the site didn't change: open update-submodules in the portfolio's Actions tab.
+name: notify-portfolio
+on:
+  workflow_run:
+    workflows: [tests]
+    types: [completed]
+    branches: [main]
+permissions: {}
+jobs:
+  notify:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Tell the portfolio this project's main changed
+        env:
+          GH_TOKEN: ${{ secrets.PORTFOLIO_DISPATCH_TOKEN }}
+          PROJECT: ${{ github.repository }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          gh api "repos/ChristianRodriguez46/ChristianRodriguez46.github.io/dispatches" \
+            -f event_type=project-main-updated \
+            -f "client_payload[project]=$PROJECT" \
+            -f "client_payload[sha]=$SHA"
+          echo "Asked the portfolio to update $PROJECT to $SHA."

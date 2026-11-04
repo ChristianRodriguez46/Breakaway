@@ -77,20 +77,25 @@ npm run test:site   # checks on my site's pages; only from the copy inside my si
 
 ## Updating my site
 
-I work on the `dev` branch and merge into `main` when an update is finished. My site doesn't change until I point it at the new `main`:
+My site updates itself when I push `main`. I work on the `dev` branch and merge into `main` when an update is finished. Then:
+
+1. The `tests` workflow runs the game tests.
+2. If they pass, `notify-portfolio` tells my site's repo that Breakaway's `main` changed. It uses the `PORTFOLIO_DISPATCH_TOKEN` secret.
+3. My site's `update-submodules` workflow moves `Projects/Breakaway` to the new `main`, runs the site checks, commits as me, pushes, and asks GitHub Pages to rebuild.
+
+Pushes to `dev` never reach the site. If any step fails, the site keeps the version it had, and GitHub emails me about the failed run.
+
+To update by hand instead (for example while the token is being renewed), I press **Run workflow** on `update-submodules` in my site's Actions tab, or run:
 
 ```bash
 cd ~/REPO/ChristianRodriguez46.github.io
+git pull
 git submodule update --remote Projects/Breakaway   # take the latest Breakaway main
-cd Projects/Breakaway && npm test && npm run test:site && npm run serve
-# check http://localhost:4101/Projects/Breakaway/, then Ctrl+C
-cd ../..
+cd Projects/Breakaway && npm run test:site && cd ../..
 git add Projects/Breakaway
 git commit -m "Update Breakaway"
 git push
 ```
-
-If something looks wrong, I don't commit. `git submodule update Projects/Breakaway` puts back the version my site had.
 
 ## Project layout
 

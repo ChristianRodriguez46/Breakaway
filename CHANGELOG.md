@@ -30,6 +30,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   39% of shots, Pro about 20% and All-Star about 8%.
 
 ### Added
+- `notify-portfolio` workflow: after the tests pass on a push to `main`, it tells my site's repo,
+  whose `update-submodules` workflow moves the Breakaway submodule to the new `main`, runs the site
+  checks and republishes the site. Pushes to `dev` never reach the site.
 - `.gitignore` for `node_modules/`, test output and editor files. The site repo's `.gitignore`
   used to cover these.
 - GitHub Actions workflow in this repo (`.github/workflows/tests.yml`) that runs `npm test` on

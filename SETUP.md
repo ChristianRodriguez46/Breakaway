@@ -138,6 +138,8 @@ For debugging, I open the game in Chrome or Edge, press F12, and use the Sources
 | The site nav shows as plain unstyled links | `../../style/main.css` loaded but is the wrong file, or the page was saved from somewhere else. Check the path and that `npm run serve` printed the address I opened |
 | `Projects/Breakaway` is empty in my site | I cloned without `--recurse-submodules`. Run `git submodule update --init` in the site repo |
 | `npm run test:site` says the site checks need my portfolio | I ran it from `~/REPO/Breakaway`. Run it from `Projects/Breakaway` inside my site |
+| `notify-portfolio` fails with 401 "Bad credentials" | The `PORTFOLIO_DISPATCH_TOKEN` token expired or the secret is missing. Make a new fine-grained token (portfolio repo only, Contents: Read and write) and update the secret in Breakaway's Settings → Secrets and variables → Actions |
+| `notify-portfolio` is green but the site didn't change | Open `update-submodules` in my site's Actions tab. A red run there means the site checks failed, so the site kept its old version |
 | Pushing Breakaway says `Permission denied (publickey)` | The clone uses an SSH address and this machine has no SSH key on GitHub. Switch to HTTPS: `git remote set-url origin https://github.com/ChristianRodriguez46/Breakaway.git` |
 | `localhost:4101` doesn't open on Windows | Check the server is still running. Try `http://127.0.0.1:4101/`. Run `wsl --shutdown` in PowerShell if forwarding stopped |
 | Address already in use | Another server is on that port. Use `python3 -m http.server 4102` |
@@ -146,15 +148,23 @@ For debugging, I open the game in Chrome or Edge, press F12, and use the Sources
 
 ## Deploying
 
-Pushing to Breakaway doesn't change my site by itself. I work on `dev`, and when an update is finished:
+I work on `dev`. Pushing `dev` never changes my site. When an update is finished:
 
-1. In `~/REPO/Breakaway`: run `npm test`, merge `dev` into `main`, and push.
-2. In my site: move the submodule to the new `main`, check it, commit and push. The README's "Updating my site" section has the commands.
+```bash
+cd ~/REPO/Breakaway
+npm test
+git switch main && git merge dev && git push && git switch dev
+```
+
+Pushing `main` starts the automatic update: the `tests` workflow, then `notify-portfolio`, then my site's `update-submodules` workflow, which moves the submodule, runs the site checks, commits, pushes and asks Pages to rebuild. The README's "Updating my site" section explains each step and how to do it by hand.
+
+Afterwards, my local copy of the site is one commit behind GitHub, so I run `git pull` there before changing anything in it.
 
 GitHub Pages then publishes the site, usually within a minute or two, at **https://christianrodriguez46.github.io/Projects/Breakaway/**. Pages builds the submodule because the Breakaway repo is public and the submodule uses an `https://` address.
 
 ## Changelog
 
+- 2026-11-04: Deploying is automatic after pushing `main`; added the token troubleshooting rows.
 - 2026-11-04: Breakaway moved to its own repo. Updated where the files live, getting the code, running it, the tests and deploying for the submodule setup.
 - 2026-10-21: Rewrote this guide in first person and removed the numbered headings.
 - 2026-10-20: Added the troubleshooting table for WSL2.

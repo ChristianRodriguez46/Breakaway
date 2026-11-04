@@ -192,7 +192,7 @@ Inside the game repo, `dev` is work in progress and `main` is finished work. Mov
 ### Consequences
 
 - Easier: reworking the game without risk to the live site; a game history that is only about the game; rolling the site back by moving the pointer.
-- Harder: two repos to keep in step; cloning the site needs `--recurse-submodules`; the site checks in `tests/site/` need the site around the game, so they run from the submodule copy and in the site repo's workflow, while `npm test` covers the game alone.
+- Harder: two repos to keep in step (pushing `main` now updates the site automatically: `notify-portfolio` here, `update-submodules` in the site); cloning the site needs `--recurse-submodules`; the site checks in `tests/site/` need the site around the game, so they run from the submodule copy and in the site repo's workflow, while `npm test` covers the game alone.
 - The game page still depends on the site's `style/main.css` and `js/main.js` for the nav. On its own, the page notices that `main.css` didn't load and hides the nav, since its links lead to site pages that aren't there.
 
 ### When I'd revisit
@@ -202,6 +202,7 @@ Inside the game repo, `dev` is work in progress and `main` is finished work. Mov
 
 ## Changelog
 
+- 2026-11-04: The site now follows Breakaway's `main` automatically (notify-portfolio and update-submodules workflows).
 - 2026-11-04: On its own, the game page hides the site's nav instead of showing it unstyled.
 - 2026-11-04: Added the repository decision (its own repo, joined to my site as a submodule) and updated where the stack decision says the game lives.
 - 2026-10-21: Merged the four separate decision records into this one file. Switched the options tables to the columns Option, Complexity, Cost, Fit with what I know, Pros and Cons. Rewrote everything in first person.
