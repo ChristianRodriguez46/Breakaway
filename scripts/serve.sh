@@ -14,8 +14,8 @@
 #      site's files around THIS copy of the game, so my work in progress shows with the real nav and
 #      fonts. Nothing in the site repo changes. Open /Projects/Breakaway/
 #      Another location for the site: SITE=/path/to/site npm run serve
-#   c. On its own, no site next to it: serves this folder. The game plays, but the nav bar and the
-#      site font are missing because they live in my site's repo. Open /
+#   c. On its own, no site next to it: serves this folder. The game looks and plays the same; the
+#      page hides my site's nav because its links lead to site pages that aren't here. Open /
 #
 # Troubleshooting
 #   - "Address already in use": another server is on 4101. Run PORT=4102 npm run serve
@@ -62,7 +62,7 @@ if [ -f "$SITE/style/main.css" ] && [ -f "$SITE/Projects/index.html" ]; then
 fi
 
 # 2c. On its own, no site next to it
-echo "On its own: open http://localhost:$PORT/ (no site next to it, so the nav and site font are missing)"
+echo "On its own: open http://localhost:$PORT/ (no site next to it, so the site nav is hidden)"
 echo "Ctrl+C stops the server."
 # 3. --bind 127.0.0.1 keeps the server off the network; WSL2 still forwards localhost to Windows.
 exec python3 -m http.server "$PORT" --bind 127.0.0.1

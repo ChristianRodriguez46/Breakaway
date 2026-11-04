@@ -1,7 +1,7 @@
 // Browser tests (TEST_PLAN §1).
 // Inside my site (Projects/Breakaway as a submodule) it serves the site root, so
 // ../../style/main.css resolves like on GitHub Pages. On its own it serves this folder,
-// where the game runs but the shared nav styles are missing.
+// where the game runs and the page hides the site's nav (html.no-site).
 import { existsSync } from 'node:fs';
 import { defineConfig, devices } from '@playwright/test';
 

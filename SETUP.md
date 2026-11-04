@@ -87,7 +87,7 @@ npm run serve       # open http://localhost:4101/Projects/Breakaway/
 
 The game page borrows the nav bar, fonts and logo from my site (`../../style/main.css`, `../../js/main.js`, `../../images/`). So when my site is cloned next to the game, `npm run serve` builds a temporary folder of links with the site's files around this copy of the game, and serves that. I see my work in progress exactly as it will look on the site, and nothing in the site repo changes. Ctrl+C deletes the temporary folder. If my site is somewhere else: `SITE=/path/to/site npm run serve`.
 
-Without the site next to it, `npm run serve` serves the game folder at http://localhost:4101/. The game plays the same, but the nav bar and the site font are missing.
+Without the site next to it, `npm run serve` serves the game folder at http://localhost:4101/. The game looks and plays the same, but without my site's nav bar. Its links go to site pages that aren't there, so when `../../style/main.css` doesn't load, `index.html` marks the page `no-site` and `style.css` hides the nav (section 2 of `style.css`).
 
 From the copy inside my site, the same command serves the site root the way GitHub Pages does:
 
@@ -134,7 +134,8 @@ For debugging, I open the game in Chrome or Edge, press F12, and use the Sources
 | `nvm: command not found` right after installing | Close and reopen the terminal, or run `source ~/.bashrc` |
 | `node -v` shows an old version | `nvm use 24`, and `nvm alias default 24` so it sticks |
 | Blank game page, console says CORS or "Failed to load module script" | I opened the file directly. Run `npm run serve` and use the address it prints |
-| Page loads but has no nav styles and a plain serif font | `npm run serve` didn't find my site next to the game. Clone it to `~/REPO/ChristianRodriguez46.github.io`, or run `SITE=/path/to/site npm run serve` |
+| The site nav is missing | Expected when the game runs on its own. To see it, clone my site to `~/REPO/ChristianRodriguez46.github.io` (or run `SITE=/path/to/site npm run serve`) and open `/Projects/Breakaway/` |
+| The site nav shows as plain unstyled links | `../../style/main.css` loaded but is the wrong file, or the page was saved from somewhere else. Check the path and that `npm run serve` printed the address I opened |
 | `Projects/Breakaway` is empty in my site | I cloned without `--recurse-submodules`. Run `git submodule update --init` in the site repo |
 | `npm run test:site` says the site checks need my portfolio | I ran it from `~/REPO/Breakaway`. Run it from `Projects/Breakaway` inside my site |
 | Pushing Breakaway says `Permission denied (publickey)` | The clone uses an SSH address and this machine has no SSH key on GitHub. Switch to HTTPS: `git remote set-url origin https://github.com/ChristianRodriguez46/Breakaway.git` |

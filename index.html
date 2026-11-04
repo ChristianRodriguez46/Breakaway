@@ -10,8 +10,11 @@
     <link rel="icon" type="image/svg+xml" href="../../images/logo.svg">
     <link rel="icon" type="image/png" sizes="512x512" href="../../images/logo.png">
     <link rel="apple-touch-icon" href="../../images/apple-touch-icon.png">
-    <!-- main.css styles the shared navigation bar; style.css is the game. No web fonts are loaded. -->
-    <link rel="stylesheet" href="../../style/main.css">
+    <!-- main.css styles the shared navigation bar; style.css is the game. No web fonts are loaded.
+         On its own (the game's repo without my site around it) main.css is missing: onerror marks
+         the page .no-site, and style.css section 2 hides the site's nav. Inside my site it loads,
+         so the nav shows. -->
+    <link rel="stylesheet" href="../../style/main.css" onerror="document.documentElement.classList.add('no-site')">
     <link rel="stylesheet" href="./style.css">
 </head>
 

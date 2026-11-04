@@ -54,7 +54,7 @@ cd Breakaway
 npm run serve
 ```
 
-`npm run serve` prints the address to open. When my site is cloned next to the game (`~/REPO/ChristianRodriguez46.github.io`), it shows this copy of the game inside my site, with the real nav and fonts, at http://localhost:4101/Projects/Breakaway/. That's how I check work in progress before it reaches the site; nothing in the site repo changes. Without the site next to it, it serves the game folder at http://localhost:4101/: the game plays the same, but the nav bar and the site font are missing, because they live in my site's repo.
+`npm run serve` prints the address to open. When my site is cloned next to the game (`~/REPO/ChristianRodriguez46.github.io`), it shows this copy of the game inside my site, with the real nav and fonts, at http://localhost:4101/Projects/Breakaway/. That's how I check work in progress before it reaches the site; nothing in the site repo changes. Without the site next to it, it serves the game folder at http://localhost:4101/: the game looks and plays the same, without my site's nav bar: its links go to site pages that aren't there, so the page hides it when the site's stylesheet doesn't load.
 
 Inside my site, the way GitHub Pages serves it:
 

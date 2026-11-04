@@ -7,6 +7,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 ## [Unreleased]
 
 ### Fixed
+- On its own (without my site around it) the game page hides the site's nav instead of showing it
+  as plain links to pages that aren't there, and keeps the site's fonts and spacing.
 - Space and the arrow keys keep working after clicking Pause or Mute.
 - Skater, goalie and puck are drawn larger on phones so they're easy to see.
 - Impossibly large saved best scores are rejected.

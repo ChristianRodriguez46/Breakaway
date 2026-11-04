@@ -23,6 +23,9 @@
      missing the .breakaway scope; the game ring is --bk-focus.
    - Red text on the dark arena fails contrast (3.09:1): red is for
      the goal light, banner plate and strip flash only, never text.
+   - The site's nav is missing: expected when the game runs on its own
+     (html.no-site, section 2). Inside my site main.css loads and the
+     nav shows; if it doesn't, check the ../../style/main.css path.
    ============================================================= */
 
 
@@ -49,9 +52,10 @@
     --bk-scrim: rgb(17 22 29 / 0.86);   /* panels over the rink */
     --bk-focus: #f2c200;
 
-    /* Type: system faces only; no downloaded fonts */
-    --bk-font-ui: var(--font-text);
-    --bk-font-display: var(--font-display);
+    /* Type: system faces only; no downloaded fonts. The fallbacks repeat main.css's stacks for
+       when the game runs on its own without the site's tokens. */
+    --bk-font-ui: var(--font-text, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Helvetica Neue", "Segoe UI", Arial, sans-serif);
+    --bk-font-display: var(--font-display, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Helvetica Neue", "Segoe UI", Arial, sans-serif);
     --bk-size-label: 12px;
     --bk-size-body: 16px;
     --bk-size-score: 22px;      /* 28px at >= 834px */
@@ -92,6 +96,27 @@
 
 
 /* ---------- 2. Page base and accessibility helpers ---------- */
+/* On its own (no site around the game), main.css doesn't load and index.html adds .no-site to
+   <html>. The site's nav would show as plain links to pages that aren't there, so hide it and the
+   skip link, give back the space kept for it, and repeat the one base reset from main.css the game
+   relies on. :where() keeps that reset at zero specificity, the same as main.css's * rule. */
+.no-site {
+    --nav-h: 0px;
+}
+
+.no-site .globalnav,
+.no-site .skip-link {
+    display: none;
+}
+
+:where(.no-site) *,
+:where(.no-site) *::before,
+:where(.no-site) *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
 /* main.css sets page-wide body type and a light canvas for the site pages.
    Undo those here for the game page only (Hangman does the same inline).
    The custom properties live on .breakaway, so the body cannot read them:
