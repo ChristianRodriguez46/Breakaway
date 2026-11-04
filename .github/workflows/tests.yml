@@ -1,0 +1,16 @@
+# Runs Breakaway's game tests (unit, integration and stats) on every push and pull request.
+# It doesn't deploy anything. The site checks (tests/site) need my portfolio around the game,
+# so they run in the portfolio repo's workflow instead.
+name: tests
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm test

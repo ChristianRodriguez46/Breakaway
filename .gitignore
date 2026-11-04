@@ -1,0 +1,20 @@
+# Files that are never committed.
+# Until Breakaway had its own repo, the portfolio's root .gitignore covered these.
+
+# development tools and scratch space
+node_modules/
+.studio/
+
+# test output
+test-results/
+playwright-report/
+tests/screenshots/
+
+# editor and system files
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Windows download markers (created when Windows copies files into WSL)
+*:Zone.Identifier

@@ -1,0 +1,1136 @@
+/* =============================================================
+   Projects/Breakaway/style.css
+   Styles for the Breakaway game page. main.css (loaded first) styles
+   the shared navigation bar; everything here is scoped to the game.
+
+   Look: an NHL broadcast. White ice, painted lines, a score bug above
+   the action, the red goal light as the one loud moment. One arena
+   look in both light and dark system themes (DESIGN_PLAN.md).
+
+   Sections in this file
+     1. Design tokens (orchestrator-owned; change values here only)
+     2. Page base and accessibility helpers        (slice C)
+     3. Play layout: strip, rink, help, touch      (slice C)
+     4. Panels, dialogs, buttons, choices          (slice C)
+     5. Banner and the goal-light moment           (slice C)
+     6. Reduced motion                              (slice C)
+
+   Troubleshooting
+   - A color is wrong on the canvas: the canvas reads the --bk-* tokens
+     once when it builds the rink layer; change the token, then resize
+     or reload to rebuild the layer.
+   - The site's blue focus ring shows inside the game: a rule is
+     missing the .breakaway scope; the game ring is --bk-focus.
+   - Red text on the dark arena fails contrast (3.09:1): red is for
+     the goal light, banner plate and strip flash only, never text.
+   ============================================================= */
+
+
+/* ---------- 1. Design tokens ---------- */
+.breakaway {
+    color-scheme: dark;
+
+    /* Rink and arena colors (DESIGN_PLAN §2; contrast checked there) */
+    --bk-ice: #eef3f6;
+    --bk-red: #c8102e;
+    --bk-blue: #0b3d91;
+    --bk-kick: #f2c200;
+    --bk-arena: #11161d;
+    --bk-panel: #20252c;
+    --bk-panel-hover: #2b3139;
+    --bk-ink: #eef3f6;          /* text on arena/panel */
+    --bk-ink-2: #9ea3a8;        /* secondary text */
+    --bk-line: #42474d;         /* hairline dividers, decorative only */
+    --bk-crease: #a9c7e8;       /* canvas paint only */
+    --bk-board: #d9dfe4;        /* top of the boards on the canvas */
+    --bk-puck: #0a0c0f;
+    --bk-white: #ffffff;
+    --bk-scratch: rgb(17 22 29 / 0.06); /* skate marks on the ice */
+    --bk-scrim: rgb(17 22 29 / 0.86);   /* panels over the rink */
+    --bk-focus: #f2c200;
+
+    /* Type: system faces only; no downloaded fonts */
+    --bk-font-ui: var(--font-text);
+    --bk-font-display: var(--font-display);
+    --bk-size-label: 12px;
+    --bk-size-body: 16px;
+    --bk-size-score: 22px;      /* 28px at >= 834px */
+    --bk-size-banner: 36px;     /* 44px at >= 834px */
+    --bk-size-title: clamp(44px, 12vw, 64px);
+
+    /* Shape and size */
+    --bk-radius-control: 10px;  /* buttons: rounded keys, not site pills */
+    --bk-radius-plate: 4px;     /* banners, strip cells: broadcast plates */
+    --bk-radius-panel: 14px;    /* panels and dialogs */
+    --bk-target-min: 44px;
+    --bk-stick-size: 132px;
+    --bk-shoot-size: 88px;
+    --bk-deke-size: 64px;
+    --bk-strip-max: 900px;
+    --bk-help-w: 280px;
+
+    /* Spacing (4px base) */
+    --bk-space-1: 4px;
+    --bk-space-2: 8px;
+    --bk-space-3: 12px;
+    --bk-space-4: 16px;
+    --bk-space-6: 24px;
+    --bk-space-8: 32px;
+
+    /* Timing (ms values are also read by JS) */
+    --bk-banner-ms: 1200;
+    --bk-flash-half-ms: 250;    /* 2 flashes per second, under the 3/s limit */
+    --bk-goal-light-ms: 1500;
+}
+
+@media (min-width: 834px) {
+    .breakaway {
+        --bk-size-score: 28px;
+        --bk-size-banner: 44px;
+    }
+}
+
+
+/* ---------- 2. Page base and accessibility helpers ---------- */
+/* main.css sets page-wide body type and a light canvas for the site pages.
+   Undo those here for the game page only (Hangman does the same inline).
+   The custom properties live on .breakaway, so the body cannot read them:
+   #11161d below is --bk-arena, repeated once so overscroll shows the arena. */
+body.breakaway-page {
+    padding-top: var(--nav-h, 52px);  /* the dark nav is position: fixed in main.css */
+    min-height: 0;
+    font-size: 16px;
+    line-height: normal;
+    letter-spacing: normal;
+    background: #11161d;
+    color-scheme: dark;
+}
+
+.breakaway {
+    --bk-strip-h: 104px;             /* phone strip: two rows */
+    --bk-touch-h: 150px;             /* phone touch controls */
+    --bk-rink-max-h: calc(100dvh - var(--nav-h, 52px) - var(--bk-strip-h) - var(--bk-touch-h) - var(--bk-space-8) - var(--bk-space-4));
+
+    position: relative;
+    min-height: calc(100dvh - var(--nav-h, 52px));
+    background: var(--bk-arena);
+    color: var(--bk-ink);
+    font-family: var(--bk-font-ui);
+    font-size: var(--bk-size-body);
+    line-height: 1.4;
+    overflow-x: clip;
+
+    & *,
+    & *::before,
+    & *::after {
+        box-sizing: border-box;
+    }
+
+    /* One focus ring for the game: 3px kick yellow, offset 2px */
+    & :focus-visible {
+        outline: 3px solid var(--bk-focus);
+        outline-offset: 2px;
+    }
+
+    & [hidden] {
+        display: none !important;
+    }
+
+    & p,
+    & h1,
+    & h2,
+    & h3,
+    & dl,
+    & dd,
+    & ol {
+        margin: 0;
+    }
+}
+
+.bk-visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+.bk-noscript {
+    padding: var(--bk-space-4);
+    background: var(--bk-panel);
+    color: var(--bk-ink);
+}
+
+
+/* ---------- 3. Play layout: strip, rink, help, touch ---------- */
+/* Phone portrait first: strip, rink, touch controls stacked. */
+.bk-play {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--bk-space-2);
+    padding: var(--bk-space-2) max(var(--bk-space-4), env(safe-area-inset-right, 0px)) var(--bk-space-3) max(var(--bk-space-4), env(safe-area-inset-left, 0px));
+    align-items: start;
+}
+
+/* Score strip */
+.bk-strip {
+    display: grid;
+    gap: var(--bk-space-1);
+    padding: var(--bk-space-2) var(--bk-space-3);
+    background: var(--bk-panel);
+    border-radius: var(--bk-radius-plate);
+    min-width: 0;
+
+    &.is-lit,
+    &.is-flashing {
+        background: var(--bk-red);
+    }
+
+    &.is-flashing {
+        animation: bk-lamp-flash calc(var(--bk-flash-half-ms) * 2ms) steps(1, end) 3;
+    }
+
+    &.is-lit .bk-strip__label,
+    &.is-flashing .bk-strip__label,
+    &.is-lit .bk-strip__clock,
+    &.is-flashing .bk-strip__clock {
+        color: var(--bk-ink);
+    }
+}
+
+.bk-strip__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--bk-space-2);
+    min-width: 0;
+}
+
+.bk-strip__round {
+    display: grid;
+    min-width: 0;
+}
+
+.bk-strip__round-name {
+    font-family: var(--bk-font-display);
+    font-weight: 700;
+    font-size: 17px;
+    white-space: nowrap;
+}
+
+.bk-strip__label {
+    font-size: var(--bk-size-label);
+    font-weight: 600;
+    color: var(--bk-ink-2);
+    white-space: nowrap;
+}
+
+.bk-strip__stats {
+    display: grid;
+    grid-template-columns: repeat(4, auto);
+    justify-content: space-between;
+    align-items: end;
+}
+
+.bk-stat {
+    display: grid;
+    gap: 0;
+}
+
+.bk-strip__num {
+    font-family: var(--bk-font-display);
+    font-weight: 700;
+    font-size: var(--bk-size-score);
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+}
+
+.bk-strip__clock {
+    color: var(--bk-kick);
+}
+
+.bk-strip__buttons {
+    display: flex;
+    gap: var(--bk-space-1);
+    flex: none;
+}
+
+/* Attempt markers: shape carries the meaning, color only adds to it */
+.bk-markers {
+    display: flex;
+    gap: var(--bk-space-1);
+    list-style: none;
+    padding: 0;
+    flex: none;
+}
+
+.bk-marker,
+.bk-markers--summary li {
+    width: 18px;
+    height: 18px;
+    display: grid;
+    place-items: center;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+
+    &[data-state="goal"]::before {
+        content: "";
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: var(--bk-ice);
+    }
+
+    &[data-state="miss"]::before {
+        content: "✕";
+        color: var(--bk-ink-2);
+    }
+
+    &[data-state="current"]::before {
+        content: "";
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        border: 3px solid var(--bk-kick);
+    }
+
+    &[data-state="pending"]::before {
+        content: "";
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: 1.5px solid var(--bk-ink-2);
+    }
+}
+
+.bk-strip.is-lit .bk-marker[data-state="miss"]::before,
+.bk-strip.is-flashing .bk-marker[data-state="miss"]::before {
+    color: var(--bk-ink);
+}
+
+.bk-markers--summary {
+    gap: var(--bk-space-2);
+
+    & li {
+        width: 22px;
+        height: 22px;
+    }
+}
+
+/* Icon buttons in the strip */
+.bk-icon-btn {
+    display: inline-grid;
+    place-items: center;
+    min-width: var(--bk-target-min);
+    min-height: var(--bk-target-min);
+    padding: 0;
+    border: 1px solid var(--bk-line);
+    border-radius: var(--bk-radius-control);
+    background: var(--bk-arena);
+    color: var(--bk-ink);
+    cursor: pointer;
+
+    &:hover {
+        background: var(--bk-panel-hover);
+    }
+
+    &:active {
+        box-shadow: inset 0 1px 0 var(--bk-line);
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: default;
+    }
+}
+
+.bk-icon-sound__off {
+    display: none;
+}
+
+.bk-icon-btn[aria-pressed="true"] {
+    & .bk-icon-sound__waves {
+        display: none;
+    }
+
+    & .bk-icon-sound__off {
+        display: inline;
+    }
+}
+
+/* Rink */
+.bk-rink-cell {
+    position: relative;
+    justify-self: center;
+    width: min(100%, calc(var(--bk-rink-max-h) * 91 / 110));
+    min-width: 0;
+}
+
+.bk-rink {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 91 / 110;
+    border-radius: var(--bk-radius-plate);
+    background: var(--bk-arena);
+    touch-action: none;
+}
+
+/* Laptop help card (hidden on touch devices, where the touch controls show instead) */
+.bk-help {
+    display: grid;
+    gap: var(--bk-space-2);
+    padding: var(--bk-space-4);
+    background: var(--bk-panel);
+    border-radius: var(--bk-radius-panel);
+    font-size: 14px;
+    width: min(100%, var(--bk-help-w));
+    justify-self: center;
+}
+
+.breakaway[data-touch="true"] .bk-help {
+    display: none;
+}
+
+.bk-help__title {
+    font-family: var(--bk-font-display);
+    font-size: 17px;
+}
+
+.bk-help__scheme,
+.bk-help__note {
+    color: var(--bk-ink-2);
+}
+
+.bk-help__rows {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--bk-space-1) var(--bk-space-3);
+
+    & dt {
+        color: var(--bk-ink-2);
+    }
+}
+
+/* Touch controls: below the rink, thumbs off the ice */
+.bk-touch {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--bk-space-3);
+    min-height: var(--bk-touch-h);
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.bk-stick {
+    display: grid;
+    justify-items: center;
+    gap: var(--bk-space-1);
+    font-size: 13px;
+    color: var(--bk-ink-2);
+}
+
+.bk-stick__base {
+    position: relative;
+    width: var(--bk-stick-size);
+    height: var(--bk-stick-size);
+    border-radius: 50%;
+    border: 2px solid var(--bk-line);
+    background: var(--bk-panel);
+    display: grid;
+    place-items: center;
+    touch-action: none;
+}
+
+.bk-stick__knob {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--bk-ice);
+    pointer-events: none;
+}
+
+.bk-touch__buttons {
+    display: flex;
+    align-items: center;
+    gap: var(--bk-space-3);
+}
+
+.bk-touch__tap-hint {
+    font-size: 14px;
+    color: var(--bk-ink-2);
+    max-width: 12em;
+    text-align: right;
+}
+
+.bk-round-btn {
+    display: grid;
+    place-items: center;
+    align-content: center;
+    border-radius: 50%;
+    border: 0;
+    font: 700 16px var(--bk-font-ui);
+    text-align: center;
+    cursor: pointer;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+
+    & small {
+        display: block;
+        font-size: 11px;
+        font-weight: 600;
+    }
+}
+
+.bk-round-btn--shoot {
+    width: var(--bk-shoot-size);
+    height: var(--bk-shoot-size);
+    background: var(--bk-ice);
+    color: var(--bk-arena);
+
+    &:hover,
+    &.is-active {
+        background: var(--bk-white);
+    }
+}
+
+.bk-round-btn--deke {
+    width: var(--bk-deke-size);
+    height: var(--bk-deke-size);
+    background: var(--bk-panel);
+    color: var(--bk-ink);
+    border: 1px solid var(--bk-line);
+
+    &:hover,
+    &.is-active {
+        background: var(--bk-panel-hover);
+    }
+}
+
+/* Very narrow phones (320px): tighten the strip so nothing scrolls sideways */
+@media (max-width: 359px) {
+    .bk-play {
+        padding-inline: var(--bk-space-2);
+    }
+
+    .bk-strip {
+        padding-inline: var(--bk-space-2);
+    }
+
+    .bk-markers {
+        gap: 2px;
+    }
+
+    .bk-marker {
+        width: 16px;
+    }
+
+    .bk-touch {
+        gap: var(--bk-space-2);
+    }
+
+    .bk-touch__buttons {
+        gap: var(--bk-space-2);
+    }
+}
+
+/* Tablet and laptop: grid 1fr auto 1fr; strip across the top, rink on the center line,
+   help card in the right column (it drops under the rink below ~1000px). */
+@media (min-width: 834px) {
+    .breakaway {
+        --bk-strip-h: 64px;
+        --bk-rink-max-h: min(720px, calc(100dvh - var(--nav-h, 52px) - var(--bk-strip-h) - var(--bk-space-8) - var(--bk-space-6)));
+    }
+
+    .bk-play {
+        grid-template-columns: 1fr auto 1fr;
+        gap: var(--bk-space-4) 28px;
+        padding: var(--bk-space-4) var(--bk-space-6);
+    }
+
+    .bk-strip {
+        grid-column: 1 / -1;
+        justify-self: center;
+        width: 100%;
+        max-width: var(--bk-strip-max);
+        grid-template-columns: auto auto 1fr auto;
+        align-items: center;
+        gap: 0 var(--bk-space-6);
+        padding: 10px var(--bk-space-4);
+    }
+
+    .bk-strip__row--top {
+        display: contents;
+    }
+
+    .bk-strip__round {
+        grid-area: 1 / 1;
+    }
+
+    .bk-markers {
+        grid-area: 1 / 2;
+        gap: 6px;
+    }
+
+    .bk-strip__stats {
+        grid-area: 1 / 3;
+        display: flex;
+        justify-content: flex-end;
+        gap: var(--bk-space-6);
+    }
+
+    .bk-strip__buttons {
+        grid-area: 1 / 4;
+    }
+
+    .bk-rink-cell {
+        grid-column: 2;
+        width: calc(var(--bk-rink-max-h) * 91 / 110);
+        max-width: 100%;
+    }
+
+    .bk-help {
+        grid-column: 3;
+        justify-self: start;
+    }
+
+    .bk-touch {
+        grid-column: 3;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+@media (min-width: 834px) and (max-width: 999px) {
+    .bk-play {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .bk-rink-cell,
+    .bk-help,
+    .bk-touch {
+        grid-column: 1;
+        justify-self: center;
+    }
+}
+
+/* Landscape phone: the rink fits the height; the stick sits left of it for the left thumb,
+   the strip and Shoot/Deke sit right of it for the right thumb. */
+@media (orientation: landscape) and (max-height: 540px) {
+    .breakaway {
+        --bk-rink-max-h: calc(100dvh - var(--nav-h, 52px) - var(--bk-space-4));
+    }
+
+    .bk-play {
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+        grid-template-rows: auto 1fr;
+        gap: var(--bk-space-2) var(--bk-space-3);
+        padding-block: var(--bk-space-2);
+    }
+
+    .bk-strip {
+        grid-column: 3;
+        grid-row: 1;
+        grid-template-columns: minmax(0, 1fr);
+        width: auto;
+        max-width: none;
+        padding: var(--bk-space-2);
+    }
+
+    .bk-strip__row--top {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .bk-strip__stats {
+        grid-area: auto;
+        display: grid;
+        grid-template-columns: repeat(2, auto);
+        gap: var(--bk-space-1) var(--bk-space-3);
+    }
+
+    .bk-strip__num {
+        font-size: 18px;
+    }
+
+    .bk-rink-cell {
+        grid-column: 2;
+        grid-row: 1 / span 2;
+        width: calc(var(--bk-rink-max-h) * 91 / 110);
+    }
+
+    .bk-help {
+        grid-column: 3;
+        grid-row: 2;
+    }
+
+    .breakaway[data-touch="true"] .bk-touch {
+        display: contents;
+    }
+
+    .bk-stick {
+        grid-column: 1;
+        grid-row: 1 / span 2;
+        align-self: center;
+        justify-self: center;
+    }
+
+    .bk-touch__buttons {
+        grid-column: 3;
+        grid-row: 2;
+        align-self: start;
+        justify-self: center;
+        flex-direction: row;
+    }
+}
+
+
+/* ---------- 4. Panels, dialogs, buttons, choices ---------- */
+.bk-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: grid;
+    place-items: start center;
+    overflow-y: auto;
+    padding: var(--bk-space-4) var(--bk-space-4) var(--bk-space-6);
+    background: var(--bk-scrim);
+}
+
+.breakaway[data-screen="playing"] .bk-overlay,
+.breakaway[data-screen="paused"] .bk-overlay {
+    display: none;
+}
+
+@media (min-width: 834px) {
+    .bk-overlay {
+        place-items: center;
+    }
+}
+
+.bk-panel,
+.bk-dialog {
+    width: 100%;
+    max-width: 440px;
+    display: grid;
+    gap: 14px;
+    padding: 20px;
+    background: var(--bk-panel);
+    color: var(--bk-ink);
+    border-radius: var(--bk-radius-panel);
+}
+
+.bk-panel--wide {
+    max-width: 560px;
+}
+
+.bk-panel__title,
+.bk-panel__heading,
+.bk-subheading {
+    font-family: var(--bk-font-display);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    text-wrap: balance;
+}
+
+.bk-panel__title {
+    font-size: var(--bk-size-title);
+}
+
+.bk-panel__heading {
+    font-size: 30px;
+
+    &:focus {
+        outline: none;
+    }
+}
+
+.bk-subheading {
+    font-size: 19px;
+}
+
+.bk-lead {
+    color: var(--bk-ink);
+}
+
+.bk-hint {
+    color: var(--bk-ink-2);
+    font-size: 14px;
+}
+
+.bk-notice {
+    color: var(--bk-ink);
+    font-size: 14px;
+    padding: var(--bk-space-2) 10px;
+    border-left: 3px solid var(--bk-kick);
+    background: var(--bk-arena);
+    border-radius: var(--bk-radius-plate);
+}
+
+.bk-status {
+    color: var(--bk-ink);
+    background: var(--bk-arena);
+    border-radius: var(--bk-radius-plate);
+    padding: var(--bk-space-2) 10px;
+}
+
+.bk-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.bk-row--stack {
+    flex-direction: column;
+
+    & .bk-btn {
+        width: 100%;
+    }
+}
+
+/* Buttons */
+.bk-btn {
+    min-height: var(--bk-target-min);
+    padding: 10px 18px;
+    border: 1px solid var(--bk-line);
+    border-radius: var(--bk-radius-control);
+    background: var(--bk-arena);
+    color: var(--bk-ink);
+    font: 600 var(--bk-size-body) var(--bk-font-ui);
+    cursor: pointer;
+
+    &:hover {
+        background: var(--bk-panel-hover);
+    }
+
+    &:active {
+        box-shadow: inset 0 1px 0 var(--bk-line);
+    }
+
+    &:disabled,
+    &[aria-disabled="true"] {
+        opacity: 0.5;
+        cursor: default;
+    }
+}
+
+.bk-btn--primary {
+    background: var(--bk-ice);
+    color: var(--bk-arena);
+    border-color: var(--bk-ice);
+
+    &:hover {
+        background: var(--bk-white);
+    }
+}
+
+.bk-btn--big {
+    width: 100%;
+    min-height: 56px;
+    font-size: 18px;
+}
+
+.bk-btn--danger {
+    background: var(--bk-ice);
+    color: var(--bk-red);
+    border-color: var(--bk-ice);
+
+    &:hover {
+        background: var(--bk-white);
+    }
+}
+
+.bk-link-btn {
+    min-height: var(--bk-target-min);
+    padding: var(--bk-space-1) 0;
+    border: 0;
+    background: none;
+    color: var(--bk-kick);
+    font: 600 15px var(--bk-font-ui);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+
+/* Choices: radio cards */
+.bk-fieldset {
+    display: grid;
+    gap: var(--bk-space-2);
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.bk-legend {
+    padding: 0;
+    margin-bottom: 6px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.bk-choices {
+    display: grid;
+    gap: var(--bk-space-2);
+}
+
+@media (min-width: 834px) {
+    .bk-choices--3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+.bk-choice {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 2px 10px;
+    align-items: start;
+    min-height: var(--bk-target-min);
+    padding: 10px var(--bk-space-3);
+    border: 1px solid var(--bk-line);
+    border-radius: var(--bk-radius-control);
+    background: var(--bk-arena);
+    cursor: pointer;
+
+    &:hover {
+        background: var(--bk-panel-hover);
+    }
+
+    & input {
+        width: 18px;
+        height: 18px;
+        margin: 3px 0 0;
+        accent-color: var(--bk-kick);
+    }
+
+    & b {
+        font-weight: 600;
+    }
+
+    & span {
+        grid-column: 2;
+        color: var(--bk-ink-2);
+        font-size: 13px;
+    }
+
+    &:has(input:checked) {
+        border-color: var(--bk-kick);
+    }
+
+    &:has(input:focus-visible) {
+        outline: 3px solid var(--bk-focus);
+        outline-offset: 2px;
+    }
+}
+
+.bk-switch {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: var(--bk-target-min);
+    cursor: pointer;
+
+    & input {
+        width: 20px;
+        height: 20px;
+        accent-color: var(--bk-kick);
+    }
+}
+
+.bk-kv-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 var(--bk-space-3);
+}
+
+.bk-kv-row__label {
+    color: var(--bk-ink-2);
+}
+
+.bk-kv-row__value {
+    font-weight: 600;
+}
+
+.bk-kv {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 6px var(--bk-space-4);
+    font-variant-numeric: tabular-nums;
+
+    & dt {
+        color: var(--bk-ink-2);
+    }
+
+    & dd {
+        font-weight: 700;
+        text-align: right;
+    }
+}
+
+.bk-best {
+    display: grid;
+    gap: 2px;
+    padding: var(--bk-space-3);
+    background: var(--bk-arena);
+    border-radius: var(--bk-radius-control);
+}
+
+.bk-best__label,
+.bk-best__detail {
+    color: var(--bk-ink-2);
+    font-size: 14px;
+}
+
+.bk-best__num {
+    font-family: var(--bk-font-display);
+    font-weight: 700;
+    font-size: 28px;
+    font-variant-numeric: tabular-nums;
+}
+
+.bk-plate {
+    justify-self: start;
+    padding: 3px 10px;
+    background: var(--bk-kick);
+    color: var(--bk-arena);
+    font-weight: 700;
+    border-radius: var(--bk-radius-plate);
+}
+
+.bk-rules {
+    padding-left: 20px;
+    display: grid;
+    gap: 6px;
+}
+
+.bk-table-wrap {
+    overflow-x: auto;
+}
+
+.bk-controls-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+
+    & th,
+    & td {
+        text-align: left;
+        vertical-align: top;
+        padding: 6px var(--bk-space-2) 6px 0;
+        border-bottom: 1px solid var(--bk-line);
+    }
+
+    & th {
+        color: var(--bk-ink-2);
+        font-weight: 600;
+    }
+}
+
+/* Dialogs (pause, reset): native modal, so focus is trapped and the page is inert */
+.bk-dialog {
+    margin: auto;               /* main.css resets margins; native centering needs auto */
+    border: 0;
+    max-width: min(440px, calc(100vw - var(--bk-space-8)));
+    font-family: var(--bk-font-ui);
+
+    &::backdrop {
+        background: var(--bk-scrim);
+    }
+
+    &:not([open]) {
+        display: none;
+    }
+}
+
+.bk-confirm {
+    display: grid;
+    gap: 10px;
+    padding: var(--bk-space-3);
+    border: 1px solid var(--bk-red);
+    border-radius: var(--bk-radius-control);
+    background: var(--bk-arena);
+}
+
+
+/* ---------- 5. Banner and the goal-light moment ---------- */
+/* The banner sits in the neutral zone so the net and the lamp stay visible. Broadcast graphics
+   cut on and off: no slide, no scale. */
+.bk-banner {
+    position: absolute;
+    left: 50%;
+    top: 76%;
+    transform: translate(-50%, -50%);
+    min-width: 62%;
+    max-width: 92%;
+    padding: 10px 18px 12px;
+    text-align: center;
+    background: var(--bk-arena);
+    color: var(--bk-ink);
+    border-radius: var(--bk-radius-plate);
+    pointer-events: none;
+}
+
+.bk-banner--goal {
+    background: var(--bk-red);
+}
+
+.bk-banner__title {
+    font-family: var(--bk-font-display);
+    font-weight: 700;
+    font-size: var(--bk-size-banner);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+}
+
+.bk-banner__detail {
+    margin-top: 2px;
+    font-size: 15px;
+}
+
+.bk-banner--rebound {
+    top: 66%;
+    min-width: 0;
+    padding: 6px 14px;
+
+    & .bk-banner__title {
+        font-size: 24px;
+    }
+}
+
+@keyframes bk-lamp-flash {
+    0% {
+        background: var(--bk-red);
+    }
+
+    50% {
+        background: var(--bk-panel);
+    }
+}
+
+
+/* ---------- 6. Reduced motion ---------- */
+/* data-motion on <html> is resolved by main.js from Settings and prefers-reduced-motion.
+   The media query covers the moment before the script runs. */
+html[data-motion="reduce"] .bk-strip.is-flashing {
+    animation: none;
+    background: var(--bk-red);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html:not([data-motion="full"]) .bk-strip.is-flashing {
+        animation: none;
+        background: var(--bk-red);
+    }
+
+    html:not([data-motion="full"]) .breakaway * {
+        scroll-behavior: auto;
+    }
+}
