@@ -248,7 +248,7 @@ Watch out for: the mutation point. Some of my functions return new objects and s
 
 ## My toolchain
 
-I run every command in the WSL Ubuntu terminal, in the `Breakaway` folder, wherever I cloned it. My site includes the game at `Projects/Breakaway` (see `SETUP.md`).
+I run every command in the WSL Ubuntu terminal, after `cd Breakaway`. My site includes the game at `Projects/Breakaway` (see `SETUP.md`).
 
 | Tool | What it does here | Commands |
 |---|---|---|

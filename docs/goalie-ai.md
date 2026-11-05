@@ -78,9 +78,10 @@ The goalie is plain functions in `src/core/`, and every random choice goes throu
 
 The statistics tests are how the tier table was calibrated: in the scripted shots Rookie gives up about 39%, Pro about 20% and All-Star about 8%.
 
-Run the goalie tests in the `Breakaway` folder:
+Run the goalie tests:
 
 ```bash
+cd Breakaway
 npm run test:goalie
 ```
 

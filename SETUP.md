@@ -35,11 +35,11 @@ I use 24 because it is the Long-Term Support line I started with. The game itsel
 
 The repos can be cloned into any folder. Cloning names them `Breakaway` and `ChristianRodriguez46.github.io`, and those names are all the code relies on. On WSL2 I keep my clones inside the Linux file system (anywhere under my home folder), not under `/mnt/c/...`. Linux tools are much faster there, and file watching works.
 
-- **`Breakaway`** (this repo) is where I work, on the `dev` branch. Every command in this guide runs in the `Breakaway` folder unless it says otherwise.
+- **`Breakaway`** (this repo) is where I work, on the `dev` branch. The commands in this guide start from the folder that holds the clone, with `cd Breakaway`.
 - **`ChristianRodriguez46.github.io`** (my portfolio) includes the game at `Projects/Breakaway` as a git submodule: a pointer to one commit of Breakaway's `main`. I only need it to see the game with the site around it and to run the site checks. When it's cloned next to `Breakaway` (side by side, cloned from the same folder), `npm run serve` finds it by itself.
 
 ```bash
-# in the Breakaway folder
+cd Breakaway
 pwd                 # should start with /home/, not /mnt/c
 git remote -v       # should show ChristianRodriguez46/Breakaway
 ```
@@ -65,7 +65,7 @@ If the portfolio was cloned without `--recurse-submodules`, its `Projects/Breaka
 The game has no runtime dependencies. This installs the development tools only:
 
 ```bash
-# in the Breakaway folder
+cd Breakaway
 npm install         # installs dev tools into node_modules/ (never committed)
 ```
 
@@ -79,9 +79,10 @@ There is no database. The game saves the best score and settings in the browser'
 
 ## Run it
 
-`npm run serve` starts a small web server and prints the address to open. While I work, I run it in the `Breakaway` folder:
+`npm run serve` starts a small web server and prints the address to open. While I work, I run it from the game's repo:
 
 ```bash
+cd Breakaway
 npm run serve       # prints the address to open
 ```
 
@@ -92,7 +93,7 @@ Without `ChristianRodriguez46.github.io` next to it, `npm run serve` serves the 
 In `ChristianRodriguez46.github.io/Projects/Breakaway` (the copy inside my portfolio), the same command serves `ChristianRodriguez46.github.io` the way GitHub Pages does:
 
 ```bash
-# in ChristianRodriguez46.github.io/Projects/Breakaway
+cd ChristianRodriguez46.github.io/Projects/Breakaway
 npm run serve       # open http://localhost:4101/Projects/Breakaway/
 ```
 
@@ -103,7 +104,7 @@ Why a server: browsers refuse to load ES modules from `file://` paths, so double
 ## Run the tests
 
 ```bash
-# in the Breakaway folder
+cd Breakaway
 npm test            # the game: unit, integration and stats tests (node --test)
 ```
 
@@ -112,14 +113,14 @@ A pass ends with a summary like `ℹ tests 228` … `ℹ pass 228` … `ℹ fail
 The site checks in `tests/site/` read my site's pages (nav links, the Projects page, the homepage tile), so they only run in the copy inside my portfolio:
 
 ```bash
-# in ChristianRodriguez46.github.io/Projects/Breakaway
+cd ChristianRodriguez46.github.io/Projects/Breakaway
 npm run test:site
 ```
 
 ## Open it in my editor
 
 ```bash
-# in the Breakaway folder
+cd Breakaway
 code .
 ```
 
@@ -151,7 +152,7 @@ For debugging, I open the game in Chrome or Edge, press F12, and use the Sources
 I work on `dev`. Pushing `dev` never changes my site. When an update is finished:
 
 ```bash
-# in the Breakaway folder
+cd Breakaway
 npm test
 git switch main && git merge dev && git push && git switch dev
 ```

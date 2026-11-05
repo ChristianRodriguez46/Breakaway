@@ -71,6 +71,7 @@ Then open http://localhost:4101/. VS Code's Live Server works too. [SETUP.md](SE
 I work on the `dev` branch. When an update is finished, I merge it into `main` and push:
 
 ```bash
+cd Breakaway
 npm test
 git switch main && git merge dev && git push && git switch dev
 ```
@@ -107,7 +108,7 @@ Breakaway/
 
 ### Run the tests
 
-Run these in the `Breakaway` folder. Node 24 is what I use. `npm test` and the feature scripts need no `npm install`.
+Run these after `cd Breakaway`. Node 24 is what I use. `npm test` and the feature scripts need no `npm install`.
 
 | Command | What it runs | Expected summary |
 |---|---|---|
