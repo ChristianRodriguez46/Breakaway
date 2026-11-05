@@ -75,12 +75,44 @@ A sweep asks: at what fraction t of this step (0 is the start, 1 is the end) doe
 
 The sizes of the puck, posts and players are larger than real on purpose so the game reads on a phone. The decision is in [decisions.md](./decisions.md).
 
-## Tests
+## How it's tested
 
-`tests/unit/collision.test.js`, `rink.test.js`, `skater.test.js` and `puck.test.js` cover the geometry. `tests/stats/shot-outcomes.test.js` fires scripted shots and checks how often each goalie tier gives up a goal.
+All of the physics is plain functions in `src/core/`, so the tests call them directly in Node with fixed inputs and a seeded random generator. No browser is involved.
+
+| Test file | Tests | What it checks |
+|---|---|---|
+| `tests/unit/rink.test.js` | 8 | The goal mouth, the inside-the-boards test at the walls and corners, bounces off the boards, the skater zone (no getting behind the goal line), and where the goalie squares up |
+| `tests/unit/skater.test.js` | 20 | Standing still stays still, acceleration and top speed, the glide stops at exactly 0, diagonals aren't faster, turning by the shortest arc, sliding along the boards and out of corners, dekes and their cooldown, shot charge, and never passing through the goalie |
+| `tests/unit/puck.test.js` | 25 | Carrying, shot speed and spread for each control scheme, friction, a goal only when the whole puck crosses, post and board bounces, bank shots, goalie saves, rebounds, and no tunneling at twice the top shot speed |
+| `tests/unit/collision.test.js` | 12 | The swept circle and capsule tests: touching counts, starting inside, missing, crossing the goal line, and the bounce math |
+| `tests/unit/vector-random.test.js` | 12 | Vector math, and the seeded random generator (same seed, same numbers) |
+
+How often each goalie level gives up a scripted shot is a goalie question, so it's covered in [Goalie AI](./goalie-ai.md).
+
+Run the physics tests from the game's folder:
+
+```bash
+npm run test:physics
+```
+
+Expected output: a ✔ line for each test, then
+
+```
+ℹ tests 77
+ℹ suites 0
+ℹ pass 77
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms …
+```
+
+To run one file, for example the puck tests: `node --test tests/unit/puck.test.js` (expect `ℹ tests 25` and `ℹ fail 0`).
 
 ## Changelog
 
+- 2026-11-04: Replaced the short Tests note with "How it's tested": what each test file checks, the `npm run test:physics` command and its expected output.
 - 2026-10-21: Wrote this page from the current code and constants.
 - 2026-10-20: Players and puck are drawn larger on small screens. This changes drawing only, not the physics sizes above.
 - 2026-10-19: Added swept collision tests, board and corner bounces, post bounces, friction and the goal-line rule.

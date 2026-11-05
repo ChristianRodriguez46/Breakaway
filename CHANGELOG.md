@@ -14,6 +14,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Impossibly large saved best scores are rejected.
 
 ### Changed
+- README reorganized: features first, then how to play, running it, how the site updates, and the
+  tests last, with the commands and their expected output. Each feature doc in `docs/` now ends
+  with "How it's tested".
 - Breakaway has its own repository. My site includes it at `Projects/Breakaway/` as a git
   submodule, so the game's address on the site stays the same, and the site only changes when I
   move the submodule to a new commit.
@@ -30,6 +33,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   39% of shots, Pro about 20% and All-Star about 8%.
 
 ### Added
+- Test scripts per feature: `npm run test:physics` (77 tests), `test:goalie` (86), `test:rules` (48)
+  and `test:browser` (17).
 - `notify-portfolio` workflow: after the tests pass on a push to `main`, it tells my site's repo,
   whose `update-submodules` workflow moves the Breakaway submodule to the new `main`, runs the site
   checks and republishes the site. Pushes to `dev` never reach the site.

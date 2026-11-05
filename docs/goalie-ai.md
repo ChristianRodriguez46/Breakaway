@@ -64,8 +64,44 @@ I calibrated the table against scripted shots in `tests/stats/shot-outcomes.test
 
 Other goalie numbers: bite shift 2.5 ft, bite freeze 0.45 s, poke lasts 0.25 s, dive extends over 0.12 s, reacting speed multiplier 1.5.
 
+## How it's tested
+
+The goalie is plain functions in `src/core/`, and every random choice goes through a seeded generator, so the tests can force a bite, a read or a poke, or replay thousands of shots exactly.
+
+| Test file | Tests | What it checks |
+|---|---|---|
+| `tests/unit/goalie.test.js` | 13 | Staying set until the skater crosses the blue line, tracking speed and staying in its zone, deke bite or read, poke rolls and their timing, the reaction delay and moving to where the shot crosses, dives and recovery, the capsule shape, and identical paths for the same seed |
+| `tests/unit/difficulty.test.js` | 11 | Which level each round uses for Ladder, Pro and All-Star starts, the All-Star improvement and its cap, and that no round is easier than the one before |
+| `tests/stats/deke-bite.test.js` | 16 | Over three seeds and many dekes, each level bites about as often as its table says, and Rookie bites more than Pro, which bites more than All-Star |
+| `tests/stats/poke-rate.test.js` | 22 | Over three seeds, each level's poke checks succeed about as often as its table says, use a bounded number of random draws, and All-Star pokes more than Pro and Rookie |
+| `tests/stats/shot-outcomes.test.js` | 24 | Over three seeds, scripted shots each end in one known outcome, All-Star saves more than Rookie, fast shots separate the levels more than slow ones, Rookie is beatable and All-Star isn't a wall, and rebound rates match the table |
+
+The statistics tests are how the tier table was calibrated: in the scripted shots Rookie gives up about 39%, Pro about 20% and All-Star about 8%.
+
+Run the goalie tests from the game's folder:
+
+```bash
+npm run test:goalie
+```
+
+Expected output: a ✔ line for each test (the statistics tests are grouped by seed), then
+
+```
+ℹ tests 86
+ℹ suites 11
+ℹ pass 86
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms …
+```
+
+To run one file: `node --test tests/unit/goalie.test.js` (expect `ℹ tests 13` and `ℹ fail 0`).
+
 ## Changelog
 
+- 2026-11-04: Added "How it's tested": what each test file checks, the `npm run test:goalie` command and its expected output.
 - 2026-10-21: Wrote this page from the current code and the tier table.
 - 2026-10-20: Recalibrated the tiers. The goalie was stopping almost every shot because pads plus body covered more than the 6 ft goal mouth. Now Rookie concedes about 39%, Pro about 20%, All-Star about 8%.
 - 2026-10-19: Added the goalie modes, the difficulty schedule and All-Star improvement.

@@ -82,12 +82,43 @@ Nothing is sent anywhere. The game page has no analytics, no cookies, no fonts o
 | Keys | `SETTINGS_KEY`, `BEST_SCORES_KEY` | `breakaway.settings`, `breakaway.best_scores` |
 | Largest saved count | `MAX_SAVED_COUNT` in `settings.js` | 10,000,000 |
 
-## Tests
+## How it's tested
 
-`tests/unit/rules.test.js`, `scoring.test.js` and `settings.test.js` cover each function. `tests/integration/game.test.js` plays scripted attempts through `stepGame()` with a seeded random.
+The rules, scoring and saved-data checks are plain functions in `src/core/`, and whole attempts can be played in Node through `stepGame()` with a seeded random generator.
+
+| Test file | Tests | What it checks |
+|---|---|---|
+| `tests/unit/rules.test.js` | 18 | A new game and the start of a run, which outcome wins a step (earliest contact, the post rules, physics beats Time), points and the deke bonus, the banner and the next attempt, clearing a round and moving up a level, ending a run early, pause and resume, and the attempt markers |
+| `tests/unit/scoring.test.js` | 5 | 100 or 150 points a goal, and when a score is a new best (a tie keeps the old one, 0 never counts) |
+| `tests/unit/settings.test.js` | 10 | Saved settings and best scores are checked field by field, bad fields fall back to defaults, the 9 best-score slots, and an impossibly large saved score is dropped |
+| `tests/integration/game.test.js` | 15 | Whole attempts through `stepGame()`: a goal, a save, a rebound goal that keeps the deke bonus, a rebound that runs out, wide, No shot, post and out, a poke check, Time, a goal at the buzzer, the next attempt's reset, a cleared round, an early end, pause and resume, and the same seed replaying identically |
+
+The privacy promise has its own check: `tests/site/no-third-party.test.js` fails if the game's files contain an outside URL or a network call. Like all site checks, it runs from the copy of the game inside my portfolio (`npm run test:site`).
+
+Run the rules tests from the game's folder:
+
+```bash
+npm run test:rules
+```
+
+Expected output: a ✔ line for each test, then
+
+```
+ℹ tests 48
+ℹ suites 0
+ℹ pass 48
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms …
+```
+
+To run one file: `node --test tests/integration/game.test.js` (expect `ℹ tests 15` and `ℹ fail 0`).
 
 ## Changelog
 
+- 2026-11-04: Replaced the short Tests note with "How it's tested": what each test file checks, the `npm run test:rules` command and its expected output.
 - 2026-10-21: Wrote this page from the current code. Added the privacy section.
 - 2026-10-21: Saved best scores above 10,000,000 are rejected. A hand-edited value like `1e21` could never be beaten.
 - 2026-10-20: A failed round goes straight to the game-over screen, which says which round failed.

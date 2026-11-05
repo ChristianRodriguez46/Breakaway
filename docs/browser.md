@@ -72,8 +72,41 @@ The menus are ordinary HTML: start, how to play, settings, pause, round summary 
 | Stick sounds per second | `STICKHANDLE_SOUNDS_PER_S_MAX` | 6 |
 | Touch stick dead zone | `STICK_DEAD_ZONE` in `touch-controls.js` | 0.12 |
 
+## How it's tested
+
+The browser layer is the part with the least automated testing, and that's on purpose: it's kept thin so the rules it drives can be tested in Node. What is checked:
+
+| Check | Tests | What it checks |
+|---|---|---|
+| `tests/unit/ui-strings.test.js` | 13 | Every banner, announcement and menu text, the shot clock and score formats, the help for each control scheme, and that every sound has a visual equivalent |
+| `tests/unit/scaffold.test.js` | 4 | The core modules never touch the page, clocks or `Math.random` (this keeps the core and shell split honest), plus the shared constants |
+| Site checks, `npm run test:site` | 36 | Run from the copy inside my portfolio. The game page loads nothing from other sites and makes no network calls, imports use the exact letter case GitHub Pages needs, and the nav links resolve |
+| By hand | | Every screen checked in a browser at phone and laptop sizes with screenshots. On 2026-11-04 I compared the page inside my site (nav shown) and on its own (nav hidden); inside the site it was pixel-for-pixel the same before and after the change |
+
+Not covered yet: the loop, renderer, input, touch and audio have no automated tests. There are no Playwright browser tests yet (`playwright.config.js` is ready, `tests/e2e/` isn't written). Touch feel, audio and screen readers still need a real device.
+
+Run the browser-side tests from the game's folder:
+
+```bash
+npm run test:browser
+```
+
+Expected output: a ✔ line for each test, then
+
+```
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms …
+```
+
 ## Changelog
 
+- 2026-11-04: On its own, the game page hides the site's nav (`index.html` marks the page `no-site` when the site's stylesheet doesn't load). Added "How it's tested", with what is and isn't covered.
 - 2026-10-21: Wrote this page from the current code.
 - 2026-10-21: Space and the arrow keys keep working after clicking Pause or Mute. Players and puck are drawn larger on phones.
 - 2026-10-20: Padded the page under the site's fixed navigation bar, and restored dialog centering that the site stylesheet reset.

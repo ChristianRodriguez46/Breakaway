@@ -107,7 +107,7 @@ cd ~/REPO/Breakaway
 npm test            # the game: unit, integration and stats tests (node --test)
 ```
 
-A pass is a summary ending in `# fail 0`. Type checking is `npm run check`.
+A pass ends with a summary like `ℹ tests 228` … `ℹ pass 228` … `ℹ fail 0`. Each feature also has its own script (`npm run test:physics`, `test:goalie`, `test:rules`, `test:browser`); the README's Tests section lists them with their expected counts. Type checking is `npm run check`.
 
 The site checks in `tests/site/` read my site's pages (nav links, the Projects page, the homepage tile), so they only run from the copy inside my site:
 
@@ -164,6 +164,7 @@ GitHub Pages then publishes the site, usually within a minute or two, at **https
 
 ## Changelog
 
+- 2026-11-04: The test section shows the real summary lines and points to the per-feature scripts.
 - 2026-11-04: Deploying is automatic after pushing `main`; added the token troubleshooting rows.
 - 2026-11-04: Breakaway moved to its own repo. Updated where the files live, getting the code, running it, the tests and deploying for the submodule setup.
 - 2026-10-21: Rewrote this guide in first person and removed the numbered headings.
