@@ -12,30 +12,24 @@ Breakaway is a top-down hockey shootout against an AI goalie. I skate in from ce
 |---|---|
 | ![Breakaway start screen on a laptop](docs/screenshots/start-laptop.png) | ![Breakaway during play on a laptop, with the controls panel](docs/screenshots/playing-laptop.png) |
 
-## Versions
+## Contents
 
-I keep every version of the game playable. Each version is a git tag and a release on the [Releases page](https://github.com/ChristianRodriguez46/Breakaway/releases), with a download named for what it is. The Play link above is always the newest version.
-
-| Version | What it is | Download | Code |
-|---|---|---|---|
-| V1, vector | The game as I first built it: the skater, goalie and puck are drawn with Canvas 2D shapes | [breakaway-v1-vector.zip](https://github.com/ChristianRodriguez46/Breakaway/releases/download/v1.0.0/breakaway-v1-vector.zip) | Branch [`release/v1`](https://github.com/ChristianRodriguez46/Breakaway/tree/release/v1), tag [`v1.0.0`](https://github.com/ChristianRodriguez46/Breakaway/tree/v1.0.0) |
-| V2, sprites | The skater, goalie and puck from top-down renders I make in Blender. In development | Not released yet | Branch [`dev`](https://github.com/ChristianRodriguez46/Breakaway/tree/dev) |
-| V3, 3D | A 3D version of the game | Planned | |
-
-### Play a download
-
-1. Download the zip for the version you want. To check it, also download its `.sha256` file from the same release and run `sha256sum -c breakaway-v1-vector.zip.sha256` in the folder that holds both. It prints `breakaway-v1-vector.zip: OK`. In PowerShell, `Get-FileHash breakaway-v1-vector.zip` prints the same hash that's in the `.sha256` file.
-2. Unzip it. You get a folder with the same name, for example `breakaway-v1-vector`.
-3. Open that folder in VS Code and install the **Live Server** extension by Ritwick Dey. Right-click `index.html` and choose **Open with Live Server**. The game opens at http://127.0.0.1:5500/index.html.
-
-Double-clicking `index.html` doesn't work, because browsers won't load the game's modules from `file://`. Without VS Code, any local web server works:
-
-```bash
-cd breakaway-v1-vector
-python3 -m http.server 4101
-```
-
-Then open http://localhost:4101/. Every download has these steps in its `PLAY.md`.
+- [Breakaway](#breakaway)
+  - [Contents](#contents)
+  - [Features](#features)
+  - [How to play](#how-to-play)
+  - [Versions and releases](#versions-and-releases)
+    - [Download and play a version](#download-and-play-a-version)
+    - [How I release a version](#how-i-release-a-version)
+  - [How I built it](#how-i-built-it)
+  - [Run it locally](#run-it-locally)
+  - [Publishing](#publishing)
+  - [Project layout](#project-layout)
+  - [Tests](#tests)
+    - [How I tested it](#how-i-tested-it)
+    - [Run the tests](#run-the-tests)
+    - [Expected output](#expected-output)
+  - [License](#license)
 
 ## Features
 
@@ -52,14 +46,65 @@ Then open http://localhost:4101/. Every download has these steps in its `PLAY.md
 
 I pick one of three control schemes in Settings. The default is Hold to charge.
 
-| Action | Hold to charge | Aim with mouse | One button |
-|---|---|---|---|
-| Skate | Arrows or WASD | Arrows or WASD | Arrows or WASD |
-| Shoot | Hold Space, release to shoot where I'm facing. Longer is faster but less accurate | Click to shoot toward the pointer | Tap Space |
-| Deke | Shift | Shift or right mouse button | none |
-| Touch | Drag the stick, hold and release Shoot, tap Deke | Drag the stick, tap the rink to shoot, tap Deke | Drag the stick, tap Shoot |
+| Action | Hold to charge                                                                    | Aim with mouse                    | One button     |
+|--------|-----------------------------------------------------------------------------------|-----------------------------------|----------------|
+| Skate  | Arrows or WASD                                                                    | Arrows or WASD                    | Arrows or WASD |
+| Shoot  | Hold Space, release to shoot where I'm facing. Longer is faster but less accurate | Click to shoot toward the pointer | Tap Space      |
+| Deke   | Shift                                                                             | Shift or right mouse button       | none           |
+| Touch  | Drag the stick, hold and release Shoot, tap Deke | Drag the stick, tap the rink to shoot, tap Deke | Drag the stick, tap Shoot |
 
 P or Escape pauses. M turns sound on or off. Aim with mouse needs a mouse or a touch screen.
+
+## Versions and releases
+
+I keep every version of the game playable. Each version is a git tag and a release on the [Releases page](https://github.com/ChristianRodriguez46/Breakaway/releases), with a download named for what it is. The Play link at the top is always the newest version.
+
+| Version | What it is | Released | Download | Code |
+|---|---|---|---|---|
+| V1, vector | The game as I first built it: the skater, goalie and puck are drawn with Canvas 2D shapes | v1.0.0, 2026-11-04 | [breakaway-v1-vector.zip](https://github.com/ChristianRodriguez46/Breakaway/releases/download/v1.0.0/breakaway-v1-vector.zip) ([checksum](https://github.com/ChristianRodriguez46/Breakaway/releases/download/v1.0.0/breakaway-v1-vector.zip.sha256)) | Branch [`release/v1`](https://github.com/ChristianRodriguez46/Breakaway/tree/release/v1), tag [`v1.0.0`](https://github.com/ChristianRodriguez46/Breakaway/tree/v1.0.0) |
+| V2, sprites | The skater, goalie and puck from top-down renders I make in Blender | In development | | Branch [`dev`](https://github.com/ChristianRodriguez46/Breakaway/tree/dev) |
+| V3, 3D | A 3D version of the game | Planned | | |
+
+### Download and play a version
+
+Each download is a folder with only what the game needs to run. It's a static web page, so any local web server can play it.
+
+1. Download the zip for the version you want from the table above or the [Releases page](https://github.com/ChristianRodriguez46/Breakaway/releases).
+2. Unzip it. You get a folder with the same name, for example `breakaway-v1-vector`.
+3. Open that folder in VS Code and install the **Live Server** extension by Ritwick Dey (`ritwickdey.LiveServer`).
+4. Right-click `index.html` and choose **Open with Live Server**. The game opens at http://127.0.0.1:5500/index.html.
+
+Double-clicking `index.html` doesn't work, because browsers won't load the game's modules from `file://`. Without VS Code, Python's built-in server works:
+
+```bash
+cd breakaway-v1-vector
+python3 -m http.server 4101
+```
+
+Then open http://localhost:4101/. On its own, the game hides my site's nav bar, and the browser's developer tools show "not found" for my site's stylesheet, script and icons; that's expected. Every download has these steps in its `PLAY.md`.
+
+**Checking a download (optional).** Each release also has a `.sha256` file. In the folder that holds both files, `sha256sum -c breakaway-v1-vector.zip.sha256` prints `breakaway-v1-vector.zip: OK` when the zip is exactly the one the release workflow built. In PowerShell, `Get-FileHash breakaway-v1-vector.zip` prints the same hash that's inside the `.sha256` file.
+
+### How I release a version
+
+Each major version has its own release branch (`release/v1`, later `release/v2` and `release/v3`). Day-to-day work happens on `dev`. When a version is ready, it goes into its release branch, where I set the version in `package.json`, add its section to [CHANGELOG.md](CHANGELOG.md) and update the table above. Then I tag it, check the download, and send it on:
+
+```bash
+cd Breakaway
+git switch release/v1
+npm test
+git tag -a v1.0.0 -m "Breakaway V1, vector"
+npm run package -- v1.0.0
+git switch main && git merge release/v1 && git push
+git push origin v1.0.0
+git switch dev && git merge main && git push
+```
+
+- `npm run package` builds the download into `dist/` from the tag, so I can unzip and play it before anything is public.
+- Pushing `main` updates my site. Pushing the tag runs the `release` workflow: it tests the game, builds the zip and its checksum from the tag, and publishes the release with that version's notes from the changelog.
+- Old versions stay: when V2 ships, V1's branch, tags and download remain, so every version can still be played. I only change an old version now and then, on its own branch, for a bug fix or a small update; it never goes into `main`.
+
+The full steps, including starting a new major version's branch and changing an older version, are in [docs/releases.md](docs/releases.md).
 
 ## How I built it
 
@@ -93,7 +138,7 @@ Then open http://localhost:4101/. VS Code's Live Server works too. [SETUP.md](SE
 
 ## Publishing
 
-I work on the `dev` branch. Each major version has a release branch (`release/v1` now), and `main` only moves through it, so my site always runs a released version. When an update is finished:
+I work on the `dev` branch. `main` only moves through the current release branch, so my site always runs a released version. When an update is finished:
 
 ```bash
 cd Breakaway
@@ -103,20 +148,7 @@ git switch main && git merge release/v1 && git push
 git switch dev && git merge main && git push
 ```
 
-Pushing `main` runs the tests on GitHub. If they pass, the `notify-portfolio` workflow tells my portfolio site, which pulls in the new version and republishes it. Pushes to `dev` and to release branches never reach the site.
-
-### Releasing a version
-
-A change to the game also gets a new version before it goes into `main`: on the release branch I set the version in `package.json`, add its section to [CHANGELOG.md](CHANGELOG.md) and update the Versions table, then tag it and publish the tag:
-
-```bash
-cd Breakaway
-git tag -a v1.0.0 -m "Breakaway V1, vector"
-npm run package -- v1.0.0
-git push origin v1.0.0
-```
-
-`npm run package` builds the same files the release gets, in `dist/`, so I can open the zip before publishing. Pushing the tag runs the `release` workflow: it tests the game, then creates the release with the zip, its checksum and that version's notes from the changelog. Tags never change my site. When the next major version ships, the old one's branch, tags and downloads stay, so every version can still be played; I only change an old version now and then, for a bug fix or a small update. The full steps, including starting a new major version's branch and changing an older version, are in [docs/releases.md](docs/releases.md).
+Pushing `main` runs the tests on GitHub. If they pass, the `notify-portfolio` workflow tells my portfolio site, which pulls in the new version and republishes it. Pushes to `dev`, to release branches and of tags never reach the site. A change to the game also gets a new version number first (see [How I release a version](#how-i-release-a-version)).
 
 ## Project layout
 
@@ -155,14 +187,14 @@ Breakaway/
 
 Run these after `cd Breakaway`. Node 24 is what I use. `npm test` and the feature scripts need no `npm install`.
 
-| Command | What it runs | Expected summary |
-|---|---|---|
-| `npm test` | Every test: unit, integration, stats and release | `tests 236`, `suites 11`, `pass 236`, `fail 0` |
-| `npm run test:physics` | Rink, skater, puck, collisions, vectors and the seeded random | `tests 77`, `pass 77`, `fail 0` |
-| `npm run test:goalie` | Goalie behavior, difficulty levels, goalie statistics | `tests 86`, `suites 11`, `pass 86`, `fail 0` |
-| `npm run test:rules` | Round rules, scoring, saved data, whole attempts | `tests 48`, `pass 48`, `fail 0` |
-| `npm run test:browser` | On-screen text, and the core never touching the page | `tests 17`, `pass 17`, `fail 0` |
-| `npm run test:release` | The download builder for releases | `tests 8`, `pass 8`, `fail 0` |
+| Command                | What it runs                                                  | Expected summary                               |
+|------------------------|---------------------------------------------------------------|------------------------------------------------|
+| `npm test`             | Every test: unit, integration, stats and release              | `tests 236`, `suites 11`, `pass 236`, `fail 0` |
+| `npm run test:physics` | Rink, skater, puck, collisions, vectors and the seeded random | `tests 77`, `pass 77`, `fail 0`                |
+| `npm run test:goalie`  | Goalie behavior, difficulty levels, goalie statistics         | `tests 86`, `suites 11`, `pass 86`, `fail 0`   |
+| `npm run test:rules`   | Round rules, scoring, saved data, whole attempts              | `tests 48`, `pass 48`, `fail 0`                |
+| `npm run test:browser` | On-screen text, and the core never touching the page          | `tests 17`, `pass 17`, `fail 0`                |
+| `npm run test:release` | The download builder for releases                             | `tests 8`, `pass 8`, `fail 0`                  |
 
 ### Expected output
 
