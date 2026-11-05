@@ -2,6 +2,8 @@
 // Inside my site (Projects/Breakaway as a submodule) it serves the site root, so
 // ../../style/main.css resolves like on GitHub Pages. On its own it serves this folder,
 // where the game runs and the page hides the site's nav (html.no-site).
+// Playwright always starts its own server on port 4120: if something is already there, the run
+// stops instead of testing whatever folder that server shows.
 import { existsSync } from 'node:fs';
 import { defineConfig, devices } from '@playwright/test';
 
@@ -19,7 +21,7 @@ export default defineConfig({
         command: 'python3 -m http.server 4120 --bind 127.0.0.1',
         cwd: IN_SITE ? '../..' : '.',
         url: BASE_URL,
-        reuseExistingServer: true
+        reuseExistingServer: false
     },
     projects: [
         { name: 'desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 }, deviceScaleFactor: 1 } },
