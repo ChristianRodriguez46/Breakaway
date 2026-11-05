@@ -202,4 +202,14 @@ export const DEFAULT_SETTINGS = deepFreeze({
 
 export const DPR_MAX = 3;
 export const SCRATCH_MAX = 120;
+
+/* Sprite sheets from tools/blender/make_sprites.py (drawing only) */
+export const SPRITE_SCHEMA_VERSION = 1;
+/** Below this speed the skater is drawn in the glide frame (legs together). */
+export const SPRITE_GLIDE_BELOW_FT_PER_S = 4;
+/** Upper limits for sprites.json values, so a broken file can't ask for a huge sheet. */
+export const SPRITE_CELL_PX_MAX = 1024;
+export const SPRITE_CELL_FT_MAX = 20;
+export const SPRITE_GRID_MAX = 64;
+export const GOALIE_SPRITE_POSES = deepFreeze(['stance', 'butterfly', 'poke', 'lean', 'dive']);
 export const STICKHANDLE_SOUNDS_PER_S_MAX = 6;

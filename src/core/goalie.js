@@ -115,7 +115,7 @@ function signOr(value, fallback) {
  * Unit vector along the goalie's pads, perpendicular to the puck→net line, pointing to larger x.
  * @param {Vec2} puckPosition @returns {Vec2}
  */
-function padsDirection(puckPosition) {
+export function padsDirection(puckPosition) {
     const toNet = normalize(subtract(NET_CENTER, puckPosition));
     if (toNet.x === 0 && toNet.y === 0) return vec(1, 0);
     const across = perpendicular(toNet);

@@ -7,6 +7,7 @@
      2. createRenderer: resize, draw, worldFromClient, destroy
      3. Per-frame drawing: scratches, goalie, puck, skater, aim,
         charge meter, goal lamp
+     4. Sprite drawing: the Blender sheets, when they're loaded
 
    How it fits: main.js builds one renderer; loop.js calls
    draw(state, alpha) once per animation frame. `alpha` (0..1) is how
@@ -16,7 +17,9 @@
    (rink-layer.js) blitted first each frame.
 
    Extra methods beyond CONTRACTS §4 (additive, used by main.js):
-     showGoalLamp(), setAimPoint(point), getPixelsPerFt().
+     showGoalLamp(), setAimPoint(point), getPixelsPerFt(),
+     setSprites(sprites). With sprites set, players and puck are drawn
+     from the Blender sheets (docs/sprites.md); without them, as shapes.
 
    Troubleshooting
    - Blurry rink on a phone: devicePixelRatio is capped at DPR_MAX
@@ -26,6 +29,8 @@
      or its parents will throw it off.
    - The lamp flashes with Reduce motion on: getMotion() must
      return 'reduce'; main.js resolves the setting.
+   - Sprites look blurry or pixelated: the sheet's cell_size_px is too
+     small for this screen's pixels per foot (see docs/sprites.md).
    ============================================================= */
 
 import {
@@ -34,10 +39,15 @@ import {
     SKATER_RADIUS_FT, PUCK_COLLISION_RADIUS_FT, GOALIE_BODY_RADIUS_FT
 } from '../core/constants.js';
 import { createRinkLayer, getWorldOffset, drawCircle } from './rink-layer.js';
+import {
+    getCellRect, getSkaterFrame, getGoaliePose, getGoalieFacingRad, getGoalieMirror, getGoalieSpriteScale
+} from '../core/sprites.js';
 
 /** @typedef {import('../core/types.js').GameState} GameState */
 /** @typedef {import('../core/types.js').Vec2} Vec2 */
 /** @typedef {import('./rink-layer.js').RinkTokens} RinkTokens */
+/** @typedef {import('./sprites.js').LoadedSprites} LoadedSprites */
+/** @typedef {import('../core/types.js').SpriteSheet} SpriteSheet */
 
 /* ---------- 1. Tokens and sizing helpers ---------- */
 
@@ -102,7 +112,8 @@ function blend(from, to, t) {
  *   getMotion: () => 'reduce'|'full', nowMs?: () => number }} options
  * @returns {{ resize(): void, draw(state: GameState|null, alpha: number): void,
  *   worldFromClient(clientX: number, clientY: number): Vec2, destroy(): void,
- *   showGoalLamp(): void, setAimPoint(point: Vec2|null): void, getPixelsPerFt(): number }}
+ *   showGoalLamp(): void, setAimPoint(point: Vec2|null): void, getPixelsPerFt(): number,
+ *   setSprites(loaded: LoadedSprites|null): void }}
  */
 export function createRenderer({ canvas, container, tokens, getMotion, nowMs = () => performance.now() }) {
     const ctx = canvas.getContext('2d');
@@ -120,6 +131,12 @@ export function createRenderer({ canvas, container, tokens, getMotion, nowMs = (
     /** @type {GameState|null} */
     let lastState = null;
     let lastAlpha = 1;
+    /** @type {LoadedSprites|null} */
+    let sprites = null;
+    // Distance skated this attempt; picks the stride frame (core/sprites.js getSkaterFrame).
+    let strideDistanceFt = 0;
+    let lastStrideX = NaN;
+    let lastStrideY = NaN;
 
     // Skate marks: fixed ring buffer of segments [x1, y1, x2, y2], no allocation per frame.
     const scratches = new Float32Array(SCRATCH_MAX * 4);
@@ -190,6 +207,28 @@ export function createRenderer({ canvas, container, tokens, getMotion, nowMs = (
     }
 
     /**
+     * Switches between the Blender sprites and the vector drawing (null).
+     * @param {LoadedSprites|null} loaded
+     * @returns {void}
+     */
+    function setSprites(loaded) {
+        sprites = loaded;
+        draw(lastState, lastAlpha);
+    }
+
+    /**
+     * Adds this frame's skater movement to the stride distance; a jump means a new attempt.
+     * @param {Vec2} at
+     * @returns {void}
+     */
+    function trackStride(at) {
+        const distance = Number.isNaN(lastStrideX) ? 0 : Math.hypot(at.x - lastStrideX, at.y - lastStrideY);
+        strideDistanceFt = distance > SCRATCH_RESET_FT ? 0 : strideDistanceFt + distance;
+        lastStrideX = at.x;
+        lastStrideY = at.y;
+    }
+
+    /**
      * Records a skate mark when the skater has moved far enough.
      * @param {Vec2} at
      * @returns {void}
@@ -242,10 +281,19 @@ export function createRenderer({ canvas, container, tokens, getMotion, nowMs = (
             const goalieAt = blend(state.goalie.previousPosition, state.goalie.position, t);
             trackScratch(skaterAt);
             drawScratches(ctx);
-            drawGoalie(ctx, goalieAt, puckAt, state.goalie.reachFt);
-            drawSkater(ctx, skaterAt, state.skater.facingRad, state.skater.hasPuck, puckAt);
-            // Puck on top: with the larger drawn players on phones, a carried puck would hide under the skater.
-            drawPuck(ctx, puckAt, state.puck.mode);
+            if (sprites) {
+                trackStride(skaterAt);
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+                drawGoalieSprite(ctx, sprites, goalieAt, puckAt, state.goalie);
+                drawSkaterSprite(ctx, sprites, skaterAt, state.skater, puckAt);
+                drawPuckSprite(ctx, sprites, puckAt, state.puck.mode);
+            } else {
+                drawGoalie(ctx, goalieAt, puckAt, state.goalie.reachFt);
+                drawSkater(ctx, skaterAt, state.skater.facingRad, state.skater.hasPuck, puckAt);
+                // Puck on top: with the larger drawn players on phones, a carried puck would hide under the skater.
+                drawPuck(ctx, puckAt, state.puck.mode);
+            }
             if (state.scheme === 'aim_mouse' && aimPoint && state.skater.hasPuck) drawAim(ctx, puckAt, aimPoint);
             if (state.scheme === 'hold_charge' && state.skater.isCharging) {
                 drawCharge(ctx, skaterAt, Math.min(1, state.skater.chargeHeldS / CHARGE_FULL_S));
@@ -400,6 +448,81 @@ export function createRenderer({ canvas, container, tokens, getMotion, nowMs = (
         c.strokeRect(at.x + 2.4, at.y - 3, 0.7, 4);
     }
 
+    /* ---------- 4. Sprite drawing ---------- */
+
+    /**
+     * Draws one cell of a sheet centered on `at`, rotated to `angleRad`. The canvas is already
+     * in feet, so the cell is drawn `cellSizeFt` across. A negative `scaleAcross` mirrors it.
+     * @param {CanvasRenderingContext2D} c
+     * @param {CanvasImageSource} image @param {SpriteSheet} sheet @param {number} index
+     * @param {Vec2} at @param {number} angleRad
+     * @param {number} scaleAlong - Along the facing direction.
+     * @param {number} scaleAcross - Across it.
+     * @returns {void}
+     */
+    function drawCell(c, image, sheet, index, at, angleRad, scaleAlong, scaleAcross) {
+        const { sx, sy, size } = getCellRect(sheet, index);
+        const half = sheet.cellSizeFt / 2;
+        c.save();
+        c.translate(at.x, at.y);
+        c.rotate(angleRad);
+        c.scale(scaleAlong, scaleAcross);
+        c.drawImage(image, sx, sy, size, size, -half, -half, sheet.cellSizeFt, sheet.cellSizeFt);
+        c.restore();
+    }
+
+    /**
+     * Goalie sprite: the pose for its mode, facing the puck, mirrored for dives and leans.
+     * @param {CanvasRenderingContext2D} c @param {LoadedSprites} loaded
+     * @param {Vec2} at @param {Vec2} puckAt @param {GameState['goalie']} goalie
+     * @returns {void}
+     */
+    function drawGoalieSprite(c, loaded, at, puckAt, goalie) {
+        const sheet = loaded.manifest.goalie;
+        const pose = getGoaliePose(goalie.mode);
+        const reachFt = Number.isFinite(goalie.reachFt) && goalie.reachFt > 0 ? goalie.reachFt : DEFAULT_REACH_FT;
+        const { along, across } = getGoalieSpriteScale(sheet, pose, reachFt, spriteScale);
+        const mirror = getGoalieMirror(goalie, puckAt, sheet.sidePoseY);
+        drawCell(c, loaded.images.goalie, sheet, sheet.poses[pose].index, at, getGoalieFacingRad(puckAt), along, across * mirror);
+    }
+
+    /**
+     * Skater sprite: the stride frame for the distance skated, plus a vector stick from the
+     * sprite's glove to the puck, so the stick always reaches it.
+     * @param {CanvasRenderingContext2D} c @param {LoadedSprites} loaded
+     * @param {Vec2} at @param {GameState['skater']} skater @param {Vec2} puckAt
+     * @returns {void}
+     */
+    function drawSkaterSprite(c, loaded, at, skater, puckAt) {
+        const sheet = loaded.manifest.skater;
+        const frame = getSkaterFrame(sheet, strideDistanceFt, Math.hypot(skater.velocity.x, skater.velocity.y));
+        const fx = Math.cos(skater.facingRad);
+        const fy = Math.sin(skater.facingRad);
+        const hand = sheet.handFt[frame];
+        const handX = at.x + (hand.x * fx - hand.y * fy) * spriteScale;
+        const handY = at.y + (hand.x * fy + hand.y * fx) * spriteScale;
+        c.strokeStyle = tokens.arena;
+        c.lineWidth = 0.3 * spriteScale;
+        c.lineCap = 'round';
+        c.beginPath();
+        c.moveTo(handX, handY);
+        if (skater.hasPuck) c.lineTo(puckAt.x - fx * 0.4, puckAt.y - fy * 0.4);
+        else c.lineTo(at.x + (fx * 2.2 - fy * 0.9) * spriteScale, at.y + (fy * 2.2 + fx * 0.9) * spriteScale);
+        c.stroke();
+        drawCell(c, loaded.images.skater, sheet, frame, at, skater.facingRad, spriteScale, spriteScale);
+    }
+
+    /**
+     * Puck sprite (its shadow is baked in). Hidden when the goalie has covered it.
+     * @param {CanvasRenderingContext2D} c @param {LoadedSprites} loaded
+     * @param {Vec2} at @param {string} mode
+     * @returns {void}
+     */
+    function drawPuckSprite(c, loaded, at, mode) {
+        if (mode === 'absorbed') return;
+        drawCell(c, loaded.images.puck, loaded.manifest.puck, 0, at, 0, spriteScale, spriteScale);
+    }
+
     /**
      * Stops observing size changes.
      * @returns {void}
@@ -411,7 +534,7 @@ export function createRenderer({ canvas, container, tokens, getMotion, nowMs = (
 
     resize();
     return {
-        resize, draw, worldFromClient, destroy, showGoalLamp, setAimPoint,
+        resize, draw, worldFromClient, destroy, showGoalLamp, setAimPoint, setSprites,
         getPixelsPerFt: () => ppfCss
     };
 }

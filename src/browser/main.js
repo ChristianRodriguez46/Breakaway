@@ -35,6 +35,8 @@ import { POINTS_PER_GOAL } from '../core/constants.js';
 import * as strings from '../core/ui-strings.js';
 import { createStore, getLocalStorage } from './storage.js';
 import { createRenderer, readRinkTokens } from './renderer.js';
+import { loadSprites } from './sprites.js';
+import { isSpritesParamOff } from '../core/sprites.js';
 import { createInput } from './input.js';
 import { createTouchControls } from './touch-controls.js';
 import { createAudio } from './audio.js';
@@ -117,6 +119,12 @@ function boot() {
     ui.setMotion(resolveMotion());
 
     const renderer = createRenderer({ canvas, container, tokens: readRinkTokens(root), getMotion: resolveMotion });
+    const spriteManifestPath = root.dataset.spriteManifest;
+    if (spriteManifestPath && !isSpritesParamOff(window.location.search)) {
+        // The vector drawing shows until the sheets arrive, and stays if they fail.
+        loadSprites({ manifestUrl: new URL(spriteManifestPath, document.baseURI).href })
+            .then((loaded) => { if (loaded) renderer.setSprites(loaded); });
+    }
     const input = createInput({
         target: window, canvas, scheme: settings.control_scheme,
         worldFromClient: (x, y) => renderer.worldFromClient(x, y)

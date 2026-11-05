@@ -142,4 +142,18 @@
 /** @typedef {{ score: number, rounds_cleared: number, goals: number, achieved_at: string }} BestScore */
 /** @typedef {{ schema_version: 1, scores: Record<string, BestScore> }} BestScores Keys are "<scheme>:<level>". */
 
+/** @typedef {'stance'|'butterfly'|'poke'|'lean'|'dive'} GoaliePose */
+/**
+ * One sprite sheet: a grid of square cells, each covering `cellSizeFt` of the rink.
+ * @typedef {object} SpriteSheet
+ * @property {string} file - PNG file name, in the same folder as sprites.json.
+ * @property {number} cellSizeFt
+ * @property {number} cellSizePx
+ * @property {number} columns
+ * @property {number} rows
+ */
+/** @typedef {SpriteSheet & { frameCount: number, strideLengthFt: number, handFt: Vec2[] }} SkaterSheet handFt: lower glove per frame, feet, x forward and y to the right. */
+/** @typedef {SpriteSheet & { sidePoseY: -1|1, poses: Record<GoaliePose, { index: number, reachFt: number }> }} GoalieSheet sidePoseY: the side the dive and lean poses point to. */
+/** @typedef {{ schemaVersion: number, skater: SkaterSheet, goalie: GoalieSheet, puck: SpriteSheet }} SpriteManifest */
+
 export {};
