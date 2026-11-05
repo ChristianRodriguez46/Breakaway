@@ -1,0 +1,36 @@
+# Publishes one version of Breakaway as a GitHub Release when I push a version tag (v1.0.0, v2.0.0, ...).
+# It runs the tests, builds the download with scripts/package-release.mjs (a zip with only what playing
+# needs, its SHA-256 checksum and that version's notes from CHANGELOG.md) and creates the release.
+# It never changes a branch and never touches my site: notify-portfolio only reacts to main.
+name: release
+on:
+  push:
+    tags: ['v*.*.*']
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm test
+      - name: Build the download
+        id: package
+        run: node scripts/package-release.mjs "$GITHUB_REF_NAME"
+      # Values reach the shell as environment variables, never pasted into the command with ${{ }},
+      # so a tag or title can't change what the command does.
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          TITLE: ${{ steps.package.outputs.title }}
+          ZIP: ${{ steps.package.outputs.zip }}
+          CHECKSUM: ${{ steps.package.outputs.checksum }}
+          NOTES: ${{ steps.package.outputs.notes }}
+          IS_LATEST: ${{ steps.package.outputs.is_latest }}
+        run: gh release create "$TAG" "$ZIP" "$CHECKSUM" --verify-tag --title "$TITLE" --notes-file "$NOTES" --latest="$IS_LATEST"

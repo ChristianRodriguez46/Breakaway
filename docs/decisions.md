@@ -1,6 +1,6 @@
 # Decisions
 
-These are the four decisions that shaped Breakaway. I wrote each one down before building on it, so I could explain later why the code looks the way it does. This file replaces the separate decision records I kept at first.
+These are the decisions that shaped Breakaway. I wrote each one down before building on it, so I could explain later why the code looks the way it does. This file replaces the separate decision records I kept at first.
 
 ## Index
 
@@ -9,6 +9,7 @@ These are the four decisions that shaped Breakaway. I wrote each one down before
 - [Structure: pure core and a thin browser shell](#structure-pure-core-and-a-thin-browser-shell)
 - [Units: the rink in feet](#units-the-rink-in-feet)
 - [Repository: its own repo, joined to my site as a submodule](#repository-its-own-repo-joined-to-my-site-as-a-submodule)
+- [Versions: tags and GitHub Releases with named downloads](#versions-tags-and-github-releases-with-named-downloads)
 - [Changelog](#changelog)
 
 I rate each option on complexity (how much I have to build and learn), cost (money), and fit with what I already know. "Fit with what I know" means my own background: HTML, CSS and JavaScript from my site and Hangman, PHP/MySQL, and C++ from coursework.
@@ -200,7 +201,53 @@ Inside the game repo, `dev` is work in progress and `main` is finished work. Mov
 - The game stops using the site's nav. Then it could have its own GitHub Pages and drop the submodule.
 - I get my own server or a build step for the site. Then the site could pull in released versions of each project instead.
 
+## Versions: tags and GitHub Releases with named downloads
+
+Decided 2026-11-04.
+
+### Context
+
+I'm about to rework the game's drawing (V2, sprites from Blender) and later make a 3D version (V3). Each version should stay playable after the next one replaces it on my site, as a download whose name says what it is.
+
+- The live site only ever shows one version: whatever is on `main`.
+- A download has to run on someone's laptop with nothing but a browser and a local server such as VS Code's Live Server.
+- I want to learn the way projects normally ship versions, so I can do it in later projects.
+
+### Options considered
+
+| Option | Complexity | Cost | Fit with what I know | Pros | Cons |
+|---|---|---|---|---|---|
+| Zips committed into the repo (`downloads/`) | Low | Free | Strong | One place; simple links | Every version adds a binary to git history forever; easy to forget to rebuild after a fix |
+| Tags only, using GitHub's automatic "Source code" zip | Low | Free | Strong | Nothing to build | I can't name it; it holds the whole repo (tests, docs, scripts) and unzips as `Breakaway-1.0.0` |
+| Tags and Releases, zip uploaded by hand | Low | Free | Strong | A named zip with no new tools | Built from my working folder, so it can differ from the tag; a manual step every time |
+| Tags and Releases, zip built by a workflow from the tag | Medium | Free (Actions on a public repo) | Close: one script and one workflow, the same tools as `tests.yml` | Named, small, repeatable zip; a checksum; notes from the changelog; one `git push` to publish | One more workflow and script to keep working; a release only exists once I push its tag |
+| A release branch per major version (`release/v1`, `release/v2`), on its own | Medium | Free | Close | Release work stays off `dev`; each version has its own line | A branch moves, so "V1" alone doesn't mean one fixed thing; still no download |
+
+### What I chose and why
+
+Two of the options together: a release branch per major version, with tags and GitHub Releases on it, and the zip built by the `release` workflow from each tag.
+
+- Preparing a release isn't development, so it doesn't happen on `dev`. Each major version gets `release/v1`, `release/v2`, `release/v3`. `main` (my site) only moves through a release branch, so the site always runs a released version.
+- A tag pins each exact release forever (`v1.0.0`, `v1.1.0`). The branch is the version's line; the tags are the points on it.
+- Building the zip from the tag, in CI, means the download is exactly what was tested and tagged, never something from my working folder.
+- The major version number is the edition (V1 vector, V2 sprites, V3 3D), so the names line up: `v1.0.0` → `breakaway-v1-vector.zip`.
+- Old versions are frozen by default. These are portfolio projects: I want every version playable so I can show how the game grew, but I won't keep changing old ones. I thought about updating every version, for example a new color scheme in all three: `git cherry-pick` can copy one commit to each branch, but the versions' files drift apart, so it gets harder with every change. Now and then I may still fix a bug or make a small change in an old version, on its own release branch, released as a new patch or minor version.
+
+### Consequences
+
+- Easier: anyone can play any version I've released; releasing is a tag and a push; checking a download is one `sha256sum -c`; release work never mixes with half-finished work on `dev`.
+- Harder: every update to the site takes three merges (`dev` → `release/vN` → `main` → `dev`). `package.json`, the changelog and the README table have to be updated before each tag (the script stops the release if the version or the changelog section is missing). A pushed tag shouldn't move, so a mistake becomes a new patch version.
+- An old version's change stays on its own branch and never goes into `main`; if the newest version has the same bug, `git cherry-pick` carries the fix over.
+
+### When I'd revisit
+
+- I want older versions playable online too. Then I'd publish each release's files under the site (for example `/Projects/Breakaway/v1/`) instead of only as downloads.
+- The game gets a build step. Then the workflow would build first and zip the build output.
+
 ## Changelog
+
+- 2026-11-04: Versions: one release branch per major version, `main` only moves through it, and old versions are frozen by default with occasional fixes on their own branch.
+- 2026-11-04: Added the versions decision: tags and GitHub Releases with named downloads.
 
 - 2026-11-04: The site now follows Breakaway's `main` automatically (notify-portfolio and update-submodules workflows).
 - 2026-11-04: On its own, the game page hides the site's nav instead of showing it unstyled.

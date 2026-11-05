@@ -6,6 +6,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-04
+
+V1, vector: the first version I release as a download. The skater, goalie and puck are drawn with
+Canvas 2D shapes. Download `breakaway-v1-vector.zip` from the
+[v1.0.0 release](https://github.com/ChristianRodriguez46/Breakaway/releases/tag/v1.0.0).
+
 ### Fixed
 - On its own (without my site around it) the game page hides the site's nav instead of showing it
   as plain links to pages that aren't there, and keeps the site's fonts and spacing.
@@ -39,6 +45,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   39% of shots, Pro about 20% and All-Star about 8%.
 
 ### Added
+- Versioned downloads. Pushing a version tag (`v1.0.0`) runs the `release` workflow, which tests the
+  game, builds a zip with only what playing needs (`breakaway-v1-vector.zip`) plus its SHA-256
+  checksum, and publishes both as a GitHub Release with the notes from this file.
+  `npm run package -- <tag>` builds the same files locally; `PLAY.md` inside the zip says how to
+  run it with Live Server. Each major version is prepared on its own release branch (`release/v1`),
+  and `main` only moves through it. Details: [docs/releases.md](docs/releases.md).
+- Release tests: `npm run test:release` (8 tests), part of `npm test`.
 - Test scripts per feature: `npm run test:physics` (77 tests), `test:goalie` (86), `test:rules` (48)
   and `test:browser` (17).
 - `notify-portfolio` workflow: after the tests pass on a push to `main`, it tells my site's repo,
@@ -83,3 +96,6 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Decisions: one document, `docs/decisions.md`, covers the stack, the fixed-timestep loop, the pure
   core and browser shell, and world units in feet.
 - Setup guide for Windows with WSL2 and VS Code, and learning notes on the game loop.
+
+[Unreleased]: https://github.com/ChristianRodriguez46/Breakaway/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/ChristianRodriguez46/Breakaway/releases/tag/v1.0.0

@@ -1,6 +1,7 @@
 {
   "name": "breakaway",
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "edition": "vector",
   "private": true,
   "description": "Top-down arcade hockey shootout against an AI goalie. Plain JavaScript modules and Canvas 2D.",
   "type": "module",
@@ -8,7 +9,7 @@
     "node": ">=24"
   },
   "scripts": {
-    "test": "node --test \"tests/unit/**/*.test.js\" \"tests/integration/**/*.test.js\" \"tests/stats/**/*.test.js\"",
+    "test": "node --test \"tests/unit/**/*.test.js\" \"tests/integration/**/*.test.js\" \"tests/stats/**/*.test.js\" \"tests/release/**/*.test.js\"",
     "test:unit": "node --test \"tests/unit/**/*.test.js\"",
     "test:integration": "node --expose-gc --test \"tests/integration/**/*.test.js\"",
     "test:stats": "node --test \"tests/stats/**/*.test.js\"",
@@ -17,6 +18,7 @@
     "test:goalie": "node --test tests/unit/goalie.test.js tests/unit/difficulty.test.js \"tests/stats/**/*.test.js\"",
     "test:rules": "node --test tests/unit/rules.test.js tests/unit/scoring.test.js tests/unit/settings.test.js tests/integration/game.test.js",
     "test:browser": "node --test tests/unit/ui-strings.test.js tests/unit/scaffold.test.js",
+    "test:release": "node --test \"tests/release/**/*.test.js\"",
     "test:e2e": "playwright test",
     "test:a11y": "playwright test --grep @a11y",
     "test:responsive": "playwright test --grep @responsive",
@@ -25,7 +27,8 @@
     "check": "tsc -p jsconfig.json",
     "lint": "eslint src tests",
     "golden": "node tests/helpers/find-golden.mjs",
-    "serve": "sh scripts/serve.sh"
+    "serve": "sh scripts/serve.sh",
+    "package": "node scripts/package-release.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.0",

@@ -108,7 +108,7 @@ cd Breakaway
 npm test            # the game: unit, integration and stats tests (node --test)
 ```
 
-A pass ends with a summary like `ℹ tests 228` … `ℹ pass 228` … `ℹ fail 0`. Each feature also has its own script (`npm run test:physics`, `test:goalie`, `test:rules`, `test:browser`); the README's Tests section lists them with their expected counts. Type checking is `npm run check`.
+A pass ends with a summary like `ℹ tests 236` … `ℹ pass 236` … `ℹ fail 0`. Each feature also has its own script (`npm run test:physics`, `test:goalie`, `test:rules`, `test:browser`, `test:release`); the README's Tests section lists them with their expected counts. Type checking is `npm run check`.
 
 The site checks in `tests/site/` read my site's pages (nav links, the Projects page, the homepage tile), so they only run in the copy inside my portfolio:
 
@@ -165,6 +165,7 @@ GitHub Pages then publishes the site, usually within a minute or two, at **https
 
 ## Changelog
 
+- 2026-11-04: The test summary counts 236 tests (the release tests are part of `npm test`), and `test:release` is in the list of per-feature scripts.
 - 2026-11-04: Commands name the `Breakaway` and `ChristianRodriguez46.github.io` folders instead of a fixed `~/REPO` path, so the guide works wherever the repos are cloned. The port tip uses `PORT=4102 npm run serve`.
 - 2026-11-04: The test section shows the real summary lines and points to the per-feature scripts.
 - 2026-11-04: Deploying is automatic after pushing `main`; added the token troubleshooting rows.

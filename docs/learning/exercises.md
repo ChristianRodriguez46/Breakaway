@@ -1,6 +1,6 @@
 # Exercises
 
-Two snippets copied from the real code. For each one I write my own answers first, in my own words, two to four sentences per question. Then I open [solutions.md](./solutions.md) and compare. A mismatch is useful information, not a failed test.
+Snippets copied from the real code. For each one I write my own answers first, in my own words, two to four sentences per question. Then I open [solutions.md](./solutions.md) and compare. A mismatch is useful information, not a failed test.
 
 ## Exercise: the swept circle test
 
@@ -62,3 +62,30 @@ Questions:
 1. What does `rng() >= params.dekeReadChance` mean in plain words? How often does a Rookie goalie bite, and an All-Star goalie?
 2. Which way does the goalie slide, and why does `signOr` need a fallback?
 3. Why does the bite branch end with `return` while the read branch falls through? What does the same seed guarantee about this code?
+
+## Exercise: publishing a release
+
+Files: `scripts/package-release.mjs` (the first line) and `.github/workflows/release.yml` (the last step). Together they turn a pushed tag into a GitHub Release with a download. See [docs/releases.md](../releases.md).
+
+```js
+git(repoDir, ['archive', '--format=zip', `--prefix=${name}/`, '-o', zipPath, tag, '--', ...paths]);
+```
+
+```yaml
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          TITLE: ${{ steps.package.outputs.title }}
+          ZIP: ${{ steps.package.outputs.zip }}
+          CHECKSUM: ${{ steps.package.outputs.checksum }}
+          NOTES: ${{ steps.package.outputs.notes }}
+          IS_LATEST: ${{ steps.package.outputs.is_latest }}
+        run: gh release create "$TAG" "$ZIP" "$CHECKSUM" --verify-tag --title "$TITLE" --notes-file "$NOTES" --latest="$IS_LATEST"
+```
+
+Questions:
+
+1. In the `git archive` line, what do `--prefix`, `tag` and `--` each do? Why build from the tag instead of zipping my folder?
+2. Why are the values passed through `env:` and used as `"$TITLE"`, instead of writing `--title "${{ steps.package.outputs.title }}"` in the `run:` line?
+3. What do `--verify-tag` and `--latest="$IS_LATEST"` each prevent?
