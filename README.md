@@ -22,7 +22,6 @@ Breakaway is a top-down hockey shootout against an AI goalie. I skate in from ce
 - **Sound, motion and accessibility.** Synthesized sound with a mute key, results read out to screen readers, keyboard-friendly menus, and a reduced-motion setting. Details: [Browser layer](docs/browser.md).
 - **Replayable with a seed.** Adding `?seed=123` to the address makes every random choice repeat, so the same inputs play the same game.
 - **Private.** The game saves only its settings and best scores in the browser. Nothing is sent anywhere, and there's a button to clear it.
-- **At home in my site, or on its own.** Inside my portfolio the page shows the site's nav bar. On its own (for example with VS Code's Live Server) the page hides the nav, because its links lead to site pages that aren't there.
 
 ## How to play
 
@@ -50,14 +49,14 @@ That split is what makes the game testable: the rules run in Node with the same 
 
 More detail:
 
-- [Decisions](docs/decisions.md): the stack, the loop, the core and shell split, the units, and why the game has its own repo.
+- [Decisions](docs/decisions.md): the stack, the loop, the core and shell split, the units, and the repository setup.
 - Feature docs: [Physics](docs/physics.md), [Goalie AI](docs/goalie-ai.md), [Rules and scoring](docs/rules-and-scoring.md), [Browser layer](docs/browser.md). Each ends with how it's tested.
 - [Learning notes](docs/learning/game-loop-notes.md), [physics notes](docs/learning/physics-notes.md), [goalie AI notes](docs/learning/goalie-ai-notes.md) and [exercises](docs/learning/exercises.md).
 - [Setup guide](SETUP.md), [changelog](CHANGELOG.md) and [iteration log](ITERATION_LOG.md).
 
 ## Run it locally
 
-The game needs a web server, because browsers won't load ES modules from `file://`. Clone it into any folder; the clone is named `Breakaway`. Then run the server in the `Breakaway` folder:
+The game needs a web server, because browsers won't load ES modules from `file://`.
 
 ```bash
 git clone https://github.com/ChristianRodriguez46/Breakaway.git
@@ -65,28 +64,18 @@ cd Breakaway
 npm run serve
 ```
 
-`npm run serve` prints the address to open:
+Then open http://localhost:4101/. VS Code's Live Server works too. [SETUP.md](SETUP.md) has the full setup, including Node and VS Code.
 
-- **With my portfolio cloned next to it** (`Breakaway` and `ChristianRodriguez46.github.io` side by side, cloned from the same folder): http://localhost:4101/Projects/Breakaway/ shows this copy of the game inside my site, with the nav bar, exactly as it will look online. Nothing in the portfolio changes. If `ChristianRodriguez46.github.io` is somewhere else: `SITE=/path/to/ChristianRodriguez46.github.io npm run serve`.
-- **On its own:** http://localhost:4101/ shows the game without the site's nav. VS Code's Live Server shows the same thing.
+## Publishing
 
-[SETUP.md](SETUP.md) has the full setup, including Node and VS Code.
-
-## How my site gets updates
-
-The game lives in this repo, and my portfolio includes it at `Projects/Breakaway/` as a git submodule (a pointer to one commit of this repo).
-
-- I work on the `dev` branch. Pushing `dev` never changes the site.
-- When an update is finished, I merge `dev` into `main` and push. GitHub runs the tests, then tells my portfolio, which moves its pointer to the new `main`, runs its site checks, and republishes the site. It takes a minute or two.
-- If any test or check fails, the site keeps the version it had, and GitHub emails me.
+I work on the `dev` branch. When an update is finished, I merge it into `main` and push:
 
 ```bash
-# in the Breakaway folder
 npm test
 git switch main && git merge dev && git push && git switch dev
 ```
 
-To update the site by hand instead, I press **Run workflow** on `update-submodules` in my portfolio's Actions tab.
+Pushing `main` runs the tests on GitHub. If they pass, the `notify-portfolio` workflow tells my portfolio site, which pulls in the new version and republishes it. Pushes to `dev` never reach the site.
 
 ## Project layout
 
@@ -97,10 +86,10 @@ Breakaway/
   about.html          the About page on my site
   src/core/           pure rules: physics, goalie, scoring, settings, constants
   src/browser/        loop, renderer, input, touch, audio, storage, UI
-  tests/              unit, integration, stats and site checks
+  tests/              unit, integration and stats tests (tests/site/ is used by my portfolio)
   docs/               decisions, feature docs, learning notes, screenshots
   scripts/serve.sh    the local web server (npm run serve)
-  .github/workflows/  tests.yml (runs the tests), notify-portfolio.yml (updates my site)
+  .github/workflows/  tests.yml (runs the tests), notify-portfolio.yml (tells my portfolio about a new main)
   SETUP.md  CHANGELOG.md  ITERATION_LOG.md
 ```
 
@@ -112,9 +101,8 @@ Breakaway/
 - **Unit tests (151)** check each function on its own: rink geometry, skating, shots, collisions, the goalie, difficulty levels, round rules, scoring, saved data, on-screen text, and that `src/core/` never touches the page.
 - **Integration tests (15)** play whole attempts through the game's one-step function: a goal, a save, a rebound goal, a shot off the post, a poke check, running out of time, clearing a round, losing a run early, and pausing.
 - **Statistics tests (62)** play thousands of scripted shots, dekes and poke attempts with fixed seeds and check that each goalie level behaves as designed. In those scripted shots Rookie gives up about 39%, Pro about 20% and All-Star about 8%.
-- **Site checks (36)** read my portfolio's pages around the game: nav links, the Projects page and homepage tile, no outside URLs or network calls, and imports with the exact letter case GitHub Pages needs. They only run where the portfolio is around the game.
-- **On GitHub:** every push runs `npm test`, and my portfolio runs the site checks before it publishes a new version.
-- **By hand:** I checked every screen in a browser at phone and laptop sizes with screenshots. I also compared the page inside my site and on its own; inside the site it was pixel-for-pixel the same before and after the nav change.
+- **On GitHub:** every push runs `npm test`.
+- **By hand:** I checked every screen in a browser at phone and laptop sizes with screenshots.
 - **Not covered yet:** touch feel on real phones, audio on devices, and screen readers. There are no automated browser (Playwright) tests yet. `playwright.config.js` is ready, but `tests/e2e/` hasn't been written.
 
 ### Run the tests
@@ -128,7 +116,6 @@ Run these in the `Breakaway` folder. Node 24 is what I use. `npm test` and the f
 | `npm run test:goalie` | Goalie behavior, difficulty levels, goalie statistics | `tests 86`, `suites 11`, `pass 86`, `fail 0` |
 | `npm run test:rules` | Round rules, scoring, saved data, whole attempts | `tests 48`, `pass 48`, `fail 0` |
 | `npm run test:browser` | On-screen text, and the core never touching the page | `tests 17`, `pass 17`, `fail 0` |
-| `npm run test:site` | The site checks; run from `Projects/Breakaway` inside my portfolio | `tests 36`, `suites 7`, `pass 36`, `fail 0` |
 
 ### Expected output
 
@@ -150,8 +137,6 @@ Each passing test prints a line starting with ✔, and the run ends with a summa
 ```
 
 The times differ on every run. A failing test prints ✖ with the expected and actual values, and the summary shows `fail` above 0.
-
-Running `npm run test:site` in `Breakaway` stops on purpose with: *The site checks need my portfolio around the game.* Run it in `ChristianRodriguez46.github.io/Projects/Breakaway` (the copy inside my portfolio) instead.
 
 ## License
 

@@ -17,6 +17,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Docs and messages name the `Breakaway` and `ChristianRodriguez46.github.io` folders instead of a
   fixed `~/REPO` location, so they make sense wherever the repos are cloned (README, SETUP, About
   page, learning notes, `scripts/serve.sh` comments, the site checks' message).
+- README covers only this repo; the portfolio comes up once, in a short Publishing section.
 - README reorganized: features first, then how to play, running it, how the site updates, and the
   tests last, with the commands and their expected output. Each feature doc in `docs/` now ends
   with "How it's tested".
