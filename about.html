@@ -173,12 +173,11 @@
 
             <!-- ========= RUN IT LOCALLY ========= -->
             <h2>Run it locally</h2>
-            <p>I use WSL2 Ubuntu. The game needs a web server because browsers won't load ES modules from <code>file://</code>.</p>
-<pre><code>mkdir -p ~/REPO &amp;&amp; cd ~/REPO
-git clone https://github.com/ChristianRodriguez46/Breakaway.git
+            <p>The game needs a web server because browsers won't load ES modules from <code>file://</code>. Clone it into any folder, then run the server in the <code>Breakaway</code> folder:</p>
+<pre><code>git clone https://github.com/ChristianRodriguez46/Breakaway.git
 cd Breakaway
 npm run serve</code></pre>
-            <p><code>npm run serve</code> prints the address to open. The game page borrows this site's nav bar and fonts, so if I clone the site next to the game (<code>git clone https://github.com/ChristianRodriguez46/ChristianRodriguez46.github.io.git</code> in the same folder), it shows the game inside the site at <code>http://localhost:4101/Projects/Breakaway/</code>. On its own it serves the game at <code>http://localhost:4101/</code>, where the game looks and plays the same, without this site's nav bar.</p>
+            <p><code>npm run serve</code> prints the address to open. The game page borrows this site's nav bar and fonts, so if <code>ChristianRodriguez46.github.io</code> is cloned next to <code>Breakaway</code> (run <code>git clone https://github.com/ChristianRodriguez46/ChristianRodriguez46.github.io.git</code> from the same folder), it shows the game inside the site at <code>http://localhost:4101/Projects/Breakaway/</code>. On its own it serves the game at <code>http://localhost:4101/</code>, where the game looks and plays the same, without this site's nav bar.</p>
 
             <!-- ========= LAYOUT ========= -->
             <h2>Project layout</h2>

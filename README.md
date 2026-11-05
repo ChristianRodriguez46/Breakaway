@@ -57,10 +57,9 @@ More detail:
 
 ## Run it locally
 
-The game needs a web server, because browsers won't load ES modules from `file://`. I use WSL2 Ubuntu.
+The game needs a web server, because browsers won't load ES modules from `file://`. Clone it into any folder; the clone is named `Breakaway`. Then run the server in the `Breakaway` folder:
 
 ```bash
-mkdir -p ~/REPO && cd ~/REPO
 git clone https://github.com/ChristianRodriguez46/Breakaway.git
 cd Breakaway
 npm run serve
@@ -68,7 +67,7 @@ npm run serve
 
 `npm run serve` prints the address to open:
 
-- **With my portfolio cloned next to it** (`~/REPO/ChristianRodriguez46.github.io`): http://localhost:4101/Projects/Breakaway/ shows this copy of the game inside my site, with the nav bar, exactly as it will look online. Nothing in the portfolio changes.
+- **With my portfolio cloned next to it** (`Breakaway` and `ChristianRodriguez46.github.io` side by side, cloned from the same folder): http://localhost:4101/Projects/Breakaway/ shows this copy of the game inside my site, with the nav bar, exactly as it will look online. Nothing in the portfolio changes. If `ChristianRodriguez46.github.io` is somewhere else: `SITE=/path/to/ChristianRodriguez46.github.io npm run serve`.
 - **On its own:** http://localhost:4101/ shows the game without the site's nav. VS Code's Live Server shows the same thing.
 
 [SETUP.md](SETUP.md) has the full setup, including Node and VS Code.
@@ -82,6 +81,7 @@ The game lives in this repo, and my portfolio includes it at `Projects/Breakaway
 - If any test or check fails, the site keeps the version it had, and GitHub emails me.
 
 ```bash
+# in the Breakaway folder
 npm test
 git switch main && git merge dev && git push && git switch dev
 ```
@@ -119,7 +119,7 @@ Breakaway/
 
 ### Run the tests
 
-Node 24 is what I use. `npm test` and the feature scripts need no `npm install`.
+Run these in the `Breakaway` folder. Node 24 is what I use. `npm test` and the feature scripts need no `npm install`.
 
 | Command | What it runs | Expected summary |
 |---|---|---|
@@ -151,7 +151,7 @@ Each passing test prints a line starting with ✔, and the run ends with a summa
 
 The times differ on every run. A failing test prints ✖ with the expected and actual values, and the summary shows `fail` above 0.
 
-Running `npm run test:site` from `~/REPO/Breakaway` stops on purpose with: *The site checks need my portfolio around the game.* Run it from `~/REPO/ChristianRodriguez46.github.io/Projects/Breakaway` instead.
+Running `npm run test:site` in `Breakaway` stops on purpose with: *The site checks need my portfolio around the game.* Run it in `ChristianRodriguez46.github.io/Projects/Breakaway` (the copy inside my portfolio) instead.
 
 ## License
 

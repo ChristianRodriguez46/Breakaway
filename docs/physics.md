@@ -89,7 +89,7 @@ All of the physics is plain functions in `src/core/`, so the tests call them dir
 
 How often each goalie level gives up a scripted shot is a goalie question, so it's covered in [Goalie AI](./goalie-ai.md).
 
-Run the physics tests from the game's folder:
+Run the physics tests in the `Breakaway` folder:
 
 ```bash
 npm run test:physics

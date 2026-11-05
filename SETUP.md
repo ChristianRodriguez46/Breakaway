@@ -33,38 +33,39 @@ I use 24 because it is the Long-Term Support line I started with. The game itsel
 
 ### Where the files live
 
-I keep my repos inside the Linux file system, in `~/REPO/`, not under `/mnt/c/...`. Linux tools are much faster there, and file watching works.
+The repos can be cloned into any folder. Cloning names them `Breakaway` and `ChristianRodriguez46.github.io`, and those names are all the code relies on. On WSL2 I keep my clones inside the Linux file system (anywhere under my home folder), not under `/mnt/c/...`. Linux tools are much faster there, and file watching works.
 
-- `~/REPO/Breakaway` is the game's own repo. I do my work here, on the `dev` branch.
-- `~/REPO/ChristianRodriguez46.github.io` is my site. It includes the game at `Projects/Breakaway` as a git submodule: a pointer to one commit of Breakaway's `main`.
+- **`Breakaway`** (this repo) is where I work, on the `dev` branch. Every command in this guide runs in the `Breakaway` folder unless it says otherwise.
+- **`ChristianRodriguez46.github.io`** (my portfolio) includes the game at `Projects/Breakaway` as a git submodule: a pointer to one commit of Breakaway's `main`. I only need it to see the game with the site around it and to run the site checks. When it's cloned next to `Breakaway` (side by side, cloned from the same folder), `npm run serve` finds it by itself.
 
 ```bash
-cd ~/REPO/Breakaway
-pwd                 # should start with /home/<me>, not /mnt/c
+# in the Breakaway folder
+pwd                 # should start with /home/, not /mnt/c
 git remote -v       # should show ChristianRodriguez46/Breakaway
 ```
 
-If a clone ever ends up on the C: drive, I clone a fresh copy into `~/REPO` and work there.
+If a clone ever ends up on the C: drive, I clone a fresh copy somewhere under my home folder and work there.
 
 ## Get the code
 
-I clone both repositories, or pull if I already have them:
+In the folder where I keep my projects, I clone the game, and optionally my portfolio next to it:
 
 ```bash
-mkdir -p ~/REPO && cd ~/REPO
 git clone https://github.com/ChristianRodriguez46/Breakaway.git
-git clone --recurse-submodules https://github.com/ChristianRodriguez46/ChristianRodriguez46.github.io.git
-cd Breakaway && git pull    # if I already had it
+git clone --recurse-submodules https://github.com/ChristianRodriguez46/ChristianRodriguez46.github.io.git   # optional
+cd Breakaway
 ```
 
-If I cloned my site without `--recurse-submodules`, `Projects/Breakaway` is an empty folder. `git submodule update --init` fills it.
+Cloning both from the same folder puts them side by side, which is what `npm run serve` looks for. If I already have them, `git pull` in each folder brings them up to date.
+
+If the portfolio was cloned without `--recurse-submodules`, its `Projects/Breakaway` folder is empty. `git submodule update --init` (run in `ChristianRodriguez46.github.io`) fills it.
 
 ## Install dependencies
 
 The game has no runtime dependencies. This installs the development tools only:
 
 ```bash
-cd ~/REPO/Breakaway
+# in the Breakaway folder
 npm install         # installs dev tools into node_modules/ (never committed)
 ```
 
@@ -78,21 +79,20 @@ There is no database. The game saves the best score and settings in the browser'
 
 ## Run it
 
-`npm run serve` starts a small web server and prints the address to open. While I work, I run it from the game's repo:
+`npm run serve` starts a small web server and prints the address to open. While I work, I run it in the `Breakaway` folder:
 
 ```bash
-cd ~/REPO/Breakaway
-npm run serve       # open http://localhost:4101/Projects/Breakaway/
+npm run serve       # prints the address to open
 ```
 
-The game page borrows the nav bar, fonts and logo from my site (`../../style/main.css`, `../../js/main.js`, `../../images/`). So when my site is cloned next to the game, `npm run serve` builds a temporary folder of links with the site's files around this copy of the game, and serves that. I see my work in progress exactly as it will look on the site, and nothing in the site repo changes. Ctrl+C deletes the temporary folder. If my site is somewhere else: `SITE=/path/to/site npm run serve`.
+The game page borrows the nav bar, fonts and logo from my site (`../../style/main.css`, `../../js/main.js`, `../../images/`). So when `ChristianRodriguez46.github.io` is cloned next to `Breakaway` (side by side), `npm run serve` builds a temporary folder of links with the site's files around this copy of the game, and serves that at http://localhost:4101/Projects/Breakaway/. I see my work in progress exactly as it will look on the site, and nothing in `ChristianRodriguez46.github.io` changes. Ctrl+C deletes the temporary folder. If `ChristianRodriguez46.github.io` is somewhere else: `SITE=/path/to/ChristianRodriguez46.github.io npm run serve`.
 
-Without the site next to it, `npm run serve` serves the game folder at http://localhost:4101/. The game looks and plays the same, but without my site's nav bar. Its links go to site pages that aren't there, so when `../../style/main.css` doesn't load, `index.html` marks the page `no-site` and `style.css` hides the nav (section 2 of `style.css`).
+Without `ChristianRodriguez46.github.io` next to it, `npm run serve` serves the `Breakaway` folder at http://localhost:4101/. The game looks and plays the same, but without my site's nav bar. Its links go to site pages that aren't there, so when `../../style/main.css` doesn't load, `index.html` marks the page `no-site` and `style.css` hides the nav (section 2 of `style.css`).
 
-From the copy inside my site, the same command serves the site root the way GitHub Pages does:
+In `ChristianRodriguez46.github.io/Projects/Breakaway` (the copy inside my portfolio), the same command serves `ChristianRodriguez46.github.io` the way GitHub Pages does:
 
 ```bash
-cd ~/REPO/ChristianRodriguez46.github.io/Projects/Breakaway
+# in ChristianRodriguez46.github.io/Projects/Breakaway
 npm run serve       # open http://localhost:4101/Projects/Breakaway/
 ```
 
@@ -103,23 +103,23 @@ Why a server: browsers refuse to load ES modules from `file://` paths, so double
 ## Run the tests
 
 ```bash
-cd ~/REPO/Breakaway
+# in the Breakaway folder
 npm test            # the game: unit, integration and stats tests (node --test)
 ```
 
 A pass ends with a summary like `ℹ tests 228` … `ℹ pass 228` … `ℹ fail 0`. Each feature also has its own script (`npm run test:physics`, `test:goalie`, `test:rules`, `test:browser`); the README's Tests section lists them with their expected counts. Type checking is `npm run check`.
 
-The site checks in `tests/site/` read my site's pages (nav links, the Projects page, the homepage tile), so they only run from the copy inside my site:
+The site checks in `tests/site/` read my site's pages (nav links, the Projects page, the homepage tile), so they only run in the copy inside my portfolio:
 
 ```bash
-cd ~/REPO/ChristianRodriguez46.github.io/Projects/Breakaway
+# in ChristianRodriguez46.github.io/Projects/Breakaway
 npm run test:site
 ```
 
 ## Open it in my editor
 
 ```bash
-cd ~/REPO/Breakaway
+# in the Breakaway folder
 code .
 ```
 
@@ -134,15 +134,15 @@ For debugging, I open the game in Chrome or Edge, press F12, and use the Sources
 | `nvm: command not found` right after installing | Close and reopen the terminal, or run `source ~/.bashrc` |
 | `node -v` shows an old version | `nvm use 24`, and `nvm alias default 24` so it sticks |
 | Blank game page, console says CORS or "Failed to load module script" | I opened the file directly. Run `npm run serve` and use the address it prints |
-| The site nav is missing | Expected when the game runs on its own. To see it, clone my site to `~/REPO/ChristianRodriguez46.github.io` (or run `SITE=/path/to/site npm run serve`) and open `/Projects/Breakaway/` |
+| The site nav is missing | Expected when the game runs on its own. To see it, clone `ChristianRodriguez46.github.io` next to `Breakaway`, or run `SITE=/path/to/ChristianRodriguez46.github.io npm run serve`, then open `/Projects/Breakaway/` |
 | The site nav shows as plain unstyled links | `../../style/main.css` loaded but is the wrong file, or the page was saved from somewhere else. Check the path and that `npm run serve` printed the address I opened |
-| `Projects/Breakaway` is empty in my site | I cloned without `--recurse-submodules`. Run `git submodule update --init` in the site repo |
-| `npm run test:site` says the site checks need my portfolio | I ran it from `~/REPO/Breakaway`. Run it from `Projects/Breakaway` inside my site |
+| `ChristianRodriguez46.github.io/Projects/Breakaway` is empty | I cloned without `--recurse-submodules`. Run `git submodule update --init` in `ChristianRodriguez46.github.io` |
+| `npm run test:site` says the site checks need my portfolio | I ran it in `Breakaway`. Run it in `ChristianRodriguez46.github.io/Projects/Breakaway` |
 | `notify-portfolio` fails with 401 "Bad credentials" | The `PORTFOLIO_DISPATCH_TOKEN` token expired or the secret is missing. Make a new fine-grained token (portfolio repo only, Contents: Read and write) and update the secret in Breakaway's Settings → Secrets and variables → Actions |
 | `notify-portfolio` is green but the site didn't change | Open `update-submodules` in my site's Actions tab. A red run there means the site checks failed, so the site kept its old version |
 | Pushing Breakaway says `Permission denied (publickey)` | The clone uses an SSH address and this machine has no SSH key on GitHub. Switch to HTTPS: `git remote set-url origin https://github.com/ChristianRodriguez46/Breakaway.git` |
 | `localhost:4101` doesn't open on Windows | Check the server is still running. Try `http://127.0.0.1:4101/`. Run `wsl --shutdown` in PowerShell if forwarding stopped |
-| Address already in use | Another server is on that port. Use `python3 -m http.server 4102` |
+| Address already in use | Another server is on that port. Use another one: `PORT=4102 npm run serve` |
 | Git shows every file as changed | Line endings. `git config --global core.autocrlf input`, and don't edit the repo from `/mnt/c` |
 | `code .` not found | Install VS Code on Windows with "Add to PATH" ticked, then reopen the WSL terminal |
 
@@ -151,19 +151,20 @@ For debugging, I open the game in Chrome or Edge, press F12, and use the Sources
 I work on `dev`. Pushing `dev` never changes my site. When an update is finished:
 
 ```bash
-cd ~/REPO/Breakaway
+# in the Breakaway folder
 npm test
 git switch main && git merge dev && git push && git switch dev
 ```
 
-Pushing `main` starts the automatic update: the `tests` workflow, then `notify-portfolio`, then my site's `update-submodules` workflow, which moves the submodule, runs the site checks, commits, pushes and asks Pages to rebuild. The README's "Updating my site" section explains each step and how to do it by hand.
+Pushing `main` starts the automatic update: the `tests` workflow, then `notify-portfolio`, then my site's `update-submodules` workflow, which moves the submodule, runs the site checks, commits, pushes and asks Pages to rebuild. The README's "How my site gets updates" section explains each step and how to do it by hand.
 
-Afterwards, my local copy of the site is one commit behind GitHub, so I run `git pull` there before changing anything in it.
+Afterwards, my local `ChristianRodriguez46.github.io` is one commit behind GitHub, so I run `git pull` in it before changing anything there.
 
 GitHub Pages then publishes the site, usually within a minute or two, at **https://christianrodriguez46.github.io/Projects/Breakaway/**. Pages builds the submodule because the Breakaway repo is public and the submodule uses an `https://` address.
 
 ## Changelog
 
+- 2026-11-04: Commands name the `Breakaway` and `ChristianRodriguez46.github.io` folders instead of a fixed `~/REPO` path, so the guide works wherever the repos are cloned. The port tip uses `PORT=4102 npm run serve`.
 - 2026-11-04: The test section shows the real summary lines and points to the per-feature scripts.
 - 2026-11-04: Deploying is automatic after pushing `main`; added the token troubleshooting rows.
 - 2026-11-04: Breakaway moved to its own repo. Updated where the files live, getting the code, running it, the tests and deploying for the submodule setup.

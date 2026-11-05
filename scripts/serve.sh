@@ -7,24 +7,27 @@
 #   3. Start python3's web server on localhost only
 #
 # The three cases
-#   a. Inside my site (~/REPO/ChristianRodriguez46.github.io/Projects/Breakaway, the submodule):
-#      serves the site root, exactly like GitHub Pages. Open /Projects/Breakaway/
-#   b. On its own, with my site cloned next to it (~/REPO/Breakaway and
-#      ~/REPO/ChristianRodriguez46.github.io): builds a temporary preview folder of links, with the
-#      site's files around THIS copy of the game, so my work in progress shows with the real nav and
-#      fonts. Nothing in the site repo changes. Open /Projects/Breakaway/
-#      Another location for the site: SITE=/path/to/site npm run serve
-#   c. On its own, no site next to it: serves this folder. The game looks and plays the same; the
-#      page hides my site's nav because its links lead to site pages that aren't here. Open /
+#   Paths are worked out from this script's place in the repo, so it works wherever the repos are
+#   cloned. It relies only on the folder names Breakaway and ChristianRodriguez46.github.io.
+#   a. In ChristianRodriguez46.github.io/Projects/Breakaway (the copy inside my portfolio, so
+#      ../../style/main.css exists): serves ChristianRodriguez46.github.io, exactly like GitHub
+#      Pages. Open /Projects/Breakaway/
+#   b. In Breakaway, with ChristianRodriguez46.github.io cloned next to it (side by side): builds a
+#      temporary preview folder of links, with the site's files around THIS copy of the game, so my
+#      work in progress shows with the real nav and fonts. Nothing in
+#      ChristianRodriguez46.github.io changes. Open /Projects/Breakaway/
+#      ChristianRodriguez46.github.io somewhere else: SITE=/path/to/ChristianRodriguez46.github.io npm run serve
+#   c. In Breakaway, with nothing next to it: serves Breakaway. The game looks and plays the same;
+#      the page hides my site's nav because its links lead to site pages that aren't here. Open /
 #
 # Troubleshooting
 #   - "Address already in use": another server is on 4101. Run PORT=4102 npm run serve
 #   - Windows can't open localhost:4101: try http://127.0.0.1:4101/, or run wsl --shutdown in PowerShell
-#   - Case b shows an old site page: the preview uses whatever is checked out in the site clone; git pull there
+#   - Case b shows an old site page: the preview uses whatever is checked out in ChristianRodriguez46.github.io; git pull there
 
 set -e
 
-# 1. This script is in scripts/, so the game folder is one level up.
+# 1. This script is in Breakaway/scripts/, so the Breakaway folder is one level up.
 cd "$(dirname "$0")/.."
 GAME_DIR="$(pwd)"
 PORT="${PORT:-4101}"

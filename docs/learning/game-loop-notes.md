@@ -248,11 +248,11 @@ Watch out for: the mutation point. Some of my functions return new objects and s
 
 ## My toolchain
 
-I run every command in the WSL Ubuntu terminal. The game's repo is at `~/REPO/Breakaway`, and my site includes it at `Projects/Breakaway` (see `SETUP.md`).
+I run every command in the WSL Ubuntu terminal, in the `Breakaway` folder, wherever I cloned it. My site includes the game at `Projects/Breakaway` (see `SETUP.md`).
 
 | Tool | What it does here | Commands |
 |---|---|---|
-| Node 24 and `node --test` | Runs unit tests of the pure logic with no browser | `node -v` (expect `v24.x`). In `~/REPO/Breakaway`, `npm test` |
+| Node 24 and `node --test` | Runs unit tests of the pure logic with no browser | `node -v` (expect `v24.x`). In the `Breakaway` folder, `npm test` |
 | `python3 -m http.server` | Serves the files over `http://` | `npm run serve` starts it and prints the address to open, usually `http://localhost:4101/Projects/Breakaway/` |
 | Chrome or Edge DevTools | Debug, measure, look at saved data | F12 |
 | VS Code with the WSL extension | Editor running inside Linux | `code .` from the repo. The bottom-left corner says **WSL: Ubuntu** |

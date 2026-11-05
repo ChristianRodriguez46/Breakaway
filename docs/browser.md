@@ -85,7 +85,7 @@ The browser layer is the part with the least automated testing, and that's on pu
 
 Not covered yet: the loop, renderer, input, touch and audio have no automated tests. There are no Playwright browser tests yet (`playwright.config.js` is ready, `tests/e2e/` isn't written). Touch feel, audio and screen readers still need a real device.
 
-Run the browser-side tests from the game's folder:
+Run the browser-side tests in the `Breakaway` folder:
 
 ```bash
 npm run test:browser

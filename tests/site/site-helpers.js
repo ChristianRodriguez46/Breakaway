@@ -12,8 +12,8 @@ export const REPO_ROOT = resolve(GAME_DIR, '../..');
 
 if (!existsSync(join(REPO_ROOT, 'Projects/index.html')) || !existsSync(join(REPO_ROOT, 'style/main.css'))) {
     throw new Error(
-        'The site checks need my portfolio around the game. Run npm run test:site from ' +
-        '~/REPO/ChristianRodriguez46.github.io/Projects/Breakaway (the submodule), not from a standalone clone.'
+        'The site checks need my portfolio around the game. Run npm run test:site in ' +
+        'ChristianRodriguez46.github.io/Projects/Breakaway (the copy inside my portfolio), not in Breakaway on its own.'
     );
 }
 

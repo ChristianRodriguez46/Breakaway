@@ -95,7 +95,7 @@ The rules, scoring and saved-data checks are plain functions in `src/core/`, and
 
 The privacy promise has its own check: `tests/site/no-third-party.test.js` fails if the game's files contain an outside URL or a network call. Like all site checks, it runs from the copy of the game inside my portfolio (`npm run test:site`).
 
-Run the rules tests from the game's folder:
+Run the rules tests in the `Breakaway` folder:
 
 ```bash
 npm run test:rules
