@@ -24,6 +24,7 @@ It runs the loop, draws the rink and players on a canvas, turns keyboard, mouse 
 - On small screens, players and the puck are drawn up to 2 times larger. This is drawing only; physics sizes don't change.
 - Skate scratches are kept in a fixed `Float32Array` ring of `SCRATCH_MAX` (120) entries, so nothing is allocated per frame.
 - Colors come from the `--bk-*` custom properties in `style.css`, read once.
+- **Sprites (V2).** `renderer.setSprites()` switches the skater, goalie and puck from shapes to sprite sheets rendered in Blender, and `main.js` loads them only when the game root has a `data-sprite-manifest` attribute. If the files are missing or fail a check, the shapes stay. How it works, the settings and how to make the sheets are in [sprites.md](./sprites.md).
 
 ### Input and touch (`input.js`, `touch-controls.js`)
 
@@ -79,11 +80,14 @@ The browser layer is the part with the least automated testing, and that's on pu
 | Check | Tests | What it checks |
 |---|---|---|
 | `tests/unit/ui-strings.test.js` | 13 | Every banner, announcement and menu text, the shot clock and score formats, the help for each control scheme, and that every sound has a visual equivalent |
+| `tests/unit/sprites.test.js` | 11 | `sprites.json` checks, choosing the skating frame, goalie pose, mirroring and size, and `?sprites=off` (details in [sprites.md](./sprites.md)) |
 | `tests/unit/scaffold.test.js` | 4 | The core modules never touch the page, clocks or `Math.random` (this keeps the core and shell split honest), plus the shared constants |
+| `tests/unit/sprite-assets.test.js` | 6 | The sprite files match `index.html` (details in [sprites.md](./sprites.md)) |
+| `tests/e2e/smoke.spec.js`, `npm run test:smoke` | 1, run in 3 projects | In a real browser at 1280 px, 375 px with touch, and 320 px: the page loads on the start screen, Play starts an attempt, one shot resolves (the attempt marker leaves "current"), and there are no console errors, page errors or failed requests, except the site files that 404 when the game runs on its own |
 | Site checks, `npm run test:site` | 36 | Run from the copy inside my portfolio. The game page loads nothing from other sites and makes no network calls, imports use the exact letter case GitHub Pages needs, and the nav links resolve |
 | By hand | | Every screen checked in a browser at phone and laptop sizes with screenshots. On 2026-11-04 I compared the page inside my site (nav shown) and on its own (nav hidden); inside the site it was pixel-for-pixel the same before and after the change |
 
-Not covered yet: the loop, renderer, input, touch and audio have no automated tests. There are no Playwright browser tests yet (`playwright.config.js` is ready, `tests/e2e/` isn't written). Touch feel, audio and screen readers still need a real device.
+Not covered: the loop, renderer, input, touch and audio have no unit tests, and the one Playwright test only plays a single shot. Touch feel, audio and screen readers still need a real device.
 
 Run the browser-side tests:
 
@@ -95,9 +99,9 @@ npm run test:browser
 Expected output: a ✔ line for each test, then
 
 ```
-ℹ tests 17
+ℹ tests 34
 ℹ suites 0
-ℹ pass 17
+ℹ pass 34
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
@@ -105,8 +109,20 @@ Expected output: a ✔ line for each test, then
 ℹ duration_ms …
 ```
 
+Run the browser smoke test (needs `npm install`, and `npx playwright install chromium` once):
+
+```bash
+cd Breakaway
+npm run test:smoke
+```
+
+Expected output ends with `3 passed`.
+
 ## Changelog
 
+- 2026-11-05: Added the first Playwright test, `tests/e2e/smoke.spec.js` (`npm run test:smoke`), and `tests/unit/sprite-assets.test.js`; `test:browser` now runs 34 tests. Playwright always starts its own server on port 4120 (`reuseExistingServer: false`), so a leftover server can't make it test another folder.
+- 2026-11-05: Moved the sprite description and its settings to [sprites.md](./sprites.md); this page keeps a short pointer and the sprite test row.
+- 2026-11-05: Added sprite drawing for V2 (`setSprites()`, `src/browser/sprites.js`, `src/core/sprites.js`) with the shapes as the fallback, its settings, and its tests.
 - 2026-11-04: On its own, the game page hides the site's nav (`index.html` marks the page `no-site` when the site's stylesheet doesn't load). Added "How it's tested", with what is and isn't covered.
 - 2026-10-21: Wrote this page from the current code.
 - 2026-10-21: Space and the arrow keys keep working after clicking Pause or Mute. Players and puck are drawn larger on phones.

@@ -62,7 +62,7 @@ I keep every version of the game playable. Each version is a git tag and a relea
 | Version | What it is | Released | Download | Code |
 |---|---|---|---|---|
 | V1, vector | The game as I first built it: the skater, goalie and puck are drawn with Canvas 2D shapes | v1.0.0, 2026-11-04 | [breakaway-v1-vector.zip](https://github.com/ChristianRodriguez46/Breakaway/releases/download/v1.0.0/breakaway-v1-vector.zip) ([checksum](https://github.com/ChristianRodriguez46/Breakaway/releases/download/v1.0.0/breakaway-v1-vector.zip.sha256)) | Branch [`release/v1`](https://github.com/ChristianRodriguez46/Breakaway/tree/release/v1), tag [`v1.0.0`](https://github.com/ChristianRodriguez46/Breakaway/tree/v1.0.0) |
-| V2, sprites | The skater, goalie and puck from top-down renders I make in Blender | In development | | Branch [`dev`](https://github.com/ChristianRodriguez46/Breakaway/tree/dev) |
+| V2, sprites | The skater, goalie and puck from top-down renders I make in Blender | In development | | Branch [`feature/sprites`](https://github.com/ChristianRodriguez46/Breakaway/tree/feature/sprites) until it merges into `dev` |
 | V3, 3D | A 3D version of the game | Planned | | |
 
 ### Download and play a version
@@ -120,8 +120,8 @@ That split is what makes the game testable: the rules run in Node with the same 
 More detail:
 
 - [Decisions](docs/decisions.md): the stack, the loop, the core and shell split, the units, the repository setup and how versions are released.
-- Feature docs: [Physics](docs/physics.md), [Goalie AI](docs/goalie-ai.md), [Rules and scoring](docs/rules-and-scoring.md), [Browser layer](docs/browser.md). Each ends with how it's tested. [Releases](docs/releases.md) covers how a version becomes a download.
-- [Learning notes](docs/learning/game-loop-notes.md), [physics notes](docs/learning/physics-notes.md), [goalie AI notes](docs/learning/goalie-ai-notes.md), [release notes](docs/learning/releases-notes.md) and [exercises](docs/learning/exercises.md).
+- Feature docs: [Physics](docs/physics.md), [Goalie AI](docs/goalie-ai.md), [Rules and scoring](docs/rules-and-scoring.md), [Browser layer](docs/browser.md), [Sprites](docs/sprites.md). Each ends with how it's tested. [Releases](docs/releases.md) covers how a version becomes a download.
+- [Learning notes](docs/learning/game-loop-notes.md), [physics notes](docs/learning/physics-notes.md), [goalie AI notes](docs/learning/goalie-ai-notes.md), [release notes](docs/learning/releases-notes.md), [Blender sprite notes](docs/learning/blender-sprites-notes.md) and [exercises](docs/learning/exercises.md).
 - [Setup guide](SETUP.md), [changelog](CHANGELOG.md) and [iteration log](ITERATION_LOG.md).
 
 ## Run it locally
@@ -160,8 +160,10 @@ Breakaway/
   about.html          the About page on my site
   src/core/           pure rules: physics, goalie, scoring, settings, constants
   src/browser/        loop, renderer, input, touch, audio, storage, UI
-  tests/              unit, integration, stats and release tests (tests/site/ is used by my portfolio)
+  tests/              unit, integration, stats and release tests, the browser smoke test in tests/e2e/
+                      (tests/site/ is used by my portfolio)
   docs/               decisions, feature docs, learning notes, screenshots
+  tools/blender/make_sprites.py   renders the V2 sprite sheets in Blender (docs/sprites.md)
   scripts/serve.sh    the local web server (npm run serve)
   scripts/package-release.mjs   builds a version's download (npm run package -- <tag>)
   .github/workflows/  tests.yml (runs the tests), notify-portfolio.yml (tells my portfolio about a new main),
@@ -175,13 +177,14 @@ Breakaway/
 ### How I tested it
 
 - **The rules run in Node with a seeded random generator**, so every test plays out the same way each time.
-- **Unit tests (151)** check each function on its own: rink geometry, skating, shots, collisions, the goalie, difficulty levels, round rules, scoring, saved data, on-screen text, and that `src/core/` never touches the page.
+- **Unit tests (168)** check each function on its own: rink geometry, skating, shots, collisions, the goalie, difficulty levels, round rules, scoring, saved data, on-screen text, sprite sheet rules, that switching sprites on in `index.html` points at sheets that exist and are big enough, and that `src/core/` never touches the page.
 - **Integration tests (15)** play whole attempts through the game's one-step function: a goal, a save, a rebound goal, a shot off the post, a poke check, running out of time, clearing a round, losing a run early, and pausing.
 - **Release tests (8)** check the download builder: tag and version rules, the zip's name, the notes taken from the changelog, which release is "Latest", and a real zip built from a throwaway git repo that must hold only the play files, as committed.
 - **Statistics tests (62)** play thousands of scripted shots, dekes and poke attempts with fixed seeds and check that each goalie level behaves as designed. In those scripted shots Rookie gives up about 39%, Pro about 20% and All-Star about 8%.
 - **On GitHub:** every push runs `npm test`, and pushing a version tag runs it again before the release is built.
+- **Browser smoke test (Playwright):** `tests/e2e/smoke.spec.js` opens the game in Chromium at laptop, phone and 320 px sizes, presses Play, takes a shot and waits for the result, and fails on any console error other than my site's files that don't exist when the game runs on its own.
 - **By hand:** I checked every screen in a browser at phone and laptop sizes with screenshots.
-- **Not covered yet:** touch feel on real phones, audio on devices, and screen readers. There are no automated browser (Playwright) tests yet. `playwright.config.js` is ready, but `tests/e2e/` hasn't been written.
+- **Not covered yet:** touch feel on real phones, audio on devices, and screen readers. The smoke test is the only Playwright test so far.
 
 ### Run the tests
 
@@ -189,12 +192,21 @@ Run these after `cd Breakaway`. Node 24 is what I use. `npm test` and the featur
 
 | Command                | What it runs                                                  | Expected summary                               |
 |------------------------|---------------------------------------------------------------|------------------------------------------------|
-| `npm test`             | Every test: unit, integration, stats and release              | `tests 236`, `suites 11`, `pass 236`, `fail 0` |
+| `npm test`             | Every test: unit, integration, stats and release              | `tests 253`, `suites 11`, `pass 253`, `fail 0` |
 | `npm run test:physics` | Rink, skater, puck, collisions, vectors and the seeded random | `tests 77`, `pass 77`, `fail 0`                |
 | `npm run test:goalie`  | Goalie behavior, difficulty levels, goalie statistics         | `tests 86`, `suites 11`, `pass 86`, `fail 0`   |
 | `npm run test:rules`   | Round rules, scoring, saved data, whole attempts              | `tests 48`, `pass 48`, `fail 0`                |
-| `npm run test:browser` | On-screen text, and the core never touching the page          | `tests 17`, `pass 17`, `fail 0`                |
+| `npm run test:browser` | On-screen text, sprite rules, core never touching the page    | `tests 34`, `pass 34`, `fail 0`                |
 | `npm run test:release` | The download builder for releases                             | `tests 8`, `pass 8`, `fail 0`                  |
+
+The browser smoke test needs Playwright, so it's kept out of `npm test`. Install it once, then run it:
+
+```bash
+cd Breakaway
+npm install                                   # dev tools, including Playwright (once)
+npx playwright install --with-deps chromium   # the browser it drives, plus Linux libraries (once; asks for my password)
+npm run test:smoke                            # expect: 3 passed (laptop, phone and 320 px sizes)
+```
 
 ### Expected output
 
@@ -205,9 +217,9 @@ Each passing test prints a line starting with ✔, and the run ends with a summa
 ✔ save: shot into a parked goalie with no rebound roll is a save and the puck is frozen (0.7ms)
 ...
 ✔ parseSeedParam accepts whole numbers in range and rejects anything else (0.4ms)
-ℹ tests 236
+ℹ tests 253
 ℹ suites 11
-ℹ pass 236
+ℹ pass 253
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0

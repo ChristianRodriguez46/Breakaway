@@ -65,12 +65,32 @@ The workflow asks only for `contents: write`, the one permission creating a rele
 |---|---|---|---|
 | `dev` | Branch | Day-to-day work on the current version | Runs the tests |
 | `release/v1`, `release/v2`, `release/v3` | Branch, one per major version | That version's releases: the version number, changelog and README table for each one | Runs the tests |
+| `feature/<name>`, for example `feature/sprites` | Branch, short-lived | Unfinished work on one feature, started from `dev`. When it works, it's merged into `dev` and the branch is deleted | Runs the tests (`tests.yml` runs on every push to any branch), but doesn't release or change my site |
 | `main` | Branch | The version my site shows | Runs the tests, then updates my site |
 | `v1.0.0`, `v1.1.0`, `v2.0.0`, … | Annotated tag on a `release/vN` commit | One exact release, forever | Runs the `release` workflow, which publishes the download |
 
-Work flows one way: `dev` → `release/vN` → `main`, and then `main` back into `dev`. `main` only moves through a release branch, so my site always runs a released version.
+Work flows one way: `dev` → `release/vN` → `main`, and then `main` back into `dev`. A feature branch starts from `dev` and goes back into `dev`, and never into a release branch or `main` directly. `main` only moves through a release branch, so my site always runs a released version.
 
 **Old versions are frozen by default.** Day-to-day work goes into the newest version. When V(N+1) ships, `release/vN` stays as it is: its branch, tags and downloads are kept so I can always show and play that version. Now and then I may still fix a bug or make a small change in an old version (see "Changing an older version" below). Once V2 work starts on `dev`, `dev` is never merged into `release/v1` again, because that would bring V2 into V1.
+
+## Feature branches
+
+A feature that takes a while, like the Blender sprites, gets its own branch, so `dev` always stays in a working state.
+
+```bash
+cd Breakaway
+git switch dev && git pull            # start from the latest dev
+git switch -c feature/sprites         # create the branch and move onto it
+git push -u origin feature/sprites    # first push; -u links it to GitHub
+git switch dev && git pull            # when it works: back to dev, up to date
+git merge feature/sprites             # bring the feature into dev
+npm test                              # make sure dev still passes
+git push                              # publish dev
+git branch -d feature/sprites         # delete the local branch
+git push origin --delete feature/sprites   # delete the branch on GitHub
+```
+
+While I work on it, a plain `git push` sends the new commits to the feature branch, and each push runs the tests on GitHub. `git branch -d` refuses to delete a branch that isn't merged yet, which protects unfinished work.
 
 ## Releasing a version
 
@@ -228,5 +248,6 @@ Expected output: a ✔ line for each test, then
 
 ## Changelog
 
+- 2026-11-05: Added feature branches (`feature/<name>`) to the branch table, and a short how-to for creating, pushing, merging and deleting one.
 - 2026-11-04: Added versioned releases: tags, the `release` workflow, `scripts/package-release.mjs`, `PLAY.md` and the release tests.
 - 2026-11-04: Releases are prepared on one branch per major version (`release/v1`), and `main` only moves through a release branch. Old versions are frozen by default; an occasional fix goes on that version's branch as a new patch release. Added how to play an old version from a clone, and changing an old version in a second folder with `git worktree`.

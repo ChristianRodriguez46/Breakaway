@@ -16,6 +16,7 @@ I run every command in my WSL (Ubuntu) terminal, not PowerShell.
 | npm | comes with Node | none | `npm -v` |
 | Python 3 | any 3.x | Comes with Ubuntu, or `sudo apt install python3` | `python3 --version` |
 | VS Code with the WSL extension | current | [code.visualstudio.com](https://code.visualstudio.com) on Windows, then the **WSL** extension by Microsoft | `code --version` from the WSL terminal |
+| Blender (optional) | 5.2 LTS | [blender.org/download](https://www.blender.org/download/) on Windows. Only needed to render the sprite sheets ([docs/sprites.md](docs/sprites.md)) | In PowerShell, `& "C:\Program Files\Blender Foundation\Blender 5.2\blender.exe" --version` |
 
 ### Install Node.js with nvm
 
@@ -108,7 +109,15 @@ cd Breakaway
 npm test            # the game: unit, integration and stats tests (node --test)
 ```
 
-A pass ends with a summary like `ℹ tests 236` … `ℹ pass 236` … `ℹ fail 0`. Each feature also has its own script (`npm run test:physics`, `test:goalie`, `test:rules`, `test:browser`, `test:release`); the README's Tests section lists them with their expected counts. Type checking is `npm run check`.
+A pass ends with a summary like `ℹ tests 253` … `ℹ pass 253` … `ℹ fail 0`. Each feature also has its own script (`npm run test:physics`, `test:goalie`, `test:rules`, `test:browser`, `test:release`); the README's Tests section lists them with their expected counts. Type checking is `npm run check`.
+
+The browser smoke test (`tests/e2e/smoke.spec.js`) uses Playwright, so it needs `npm install` and a browser for Playwright to drive. It isn't part of `npm test`:
+
+```bash
+cd Breakaway
+npx playwright install --with-deps chromium   # once: Chromium plus the Linux libraries it needs (asks for my password)
+npm run test:smoke                            # expect: 3 passed
+```
 
 The site checks in `tests/site/` read my site's pages (nav links, the Projects page, the homepage tile), so they only run in the copy inside my portfolio:
 
@@ -146,6 +155,8 @@ For debugging, I open the game in Chrome or Edge, press F12, and use the Sources
 | Address already in use | Another server is on that port. Use another one: `PORT=4102 npm run serve` |
 | Git shows every file as changed | Line endings. `git config --global core.autocrlf input`, and don't edit the repo from `/mnt/c` |
 | `code .` not found | Install VS Code on Windows with "Add to PATH" ticked, then reopen the WSL terminal |
+| `npm run test:smoke` says `Cannot find package '@playwright/test'` | Run `npm install` first |
+| Playwright says the browser is missing or `Host system is missing dependencies` | Run `npx playwright install --with-deps chromium` |
 
 ## Deploying
 
@@ -165,6 +176,7 @@ GitHub Pages then publishes the site, usually within a minute or two, at **https
 
 ## Changelog
 
+- 2026-11-05: The test summary counts 253 tests. Added Blender (optional, for the sprite sheets) to the prerequisites, the Playwright smoke test (`npm run test:smoke`) and its troubleshooting rows.
 - 2026-11-04: The test summary counts 236 tests (the release tests are part of `npm test`), and `test:release` is in the list of per-feature scripts.
 - 2026-11-04: Commands name the `Breakaway` and `ChristianRodriguez46.github.io` folders instead of a fixed `~/REPO` path, so the guide works wherever the repos are cloned. The port tip uses `PORT=4102 npm run serve`.
 - 2026-11-04: The test section shows the real summary lines and points to the per-feature scripts.

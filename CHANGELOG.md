@@ -6,6 +6,26 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added
+- Blender script `tools/blender/make_sprites.py`: builds a top-down skater, goalie and puck from simple
+  shapes and renders them as sprite sheets (8 skating frames, 5 goalie poses, the puck) with a
+  `sprites.json` that describes them. Run it with
+  `blender -b --factory-startup -P tools/blender/make_sprites.py -- --out assets/sprites`.
+  It also runs from Blender's Text Editor (Scripting tab, Run Script). Written for Blender 5.2 LTS. After each
+  render it clears the faint shadow left around each cell, so no gray square shows around a player, and the
+  puck renders black instead of gray.
+- Sprite drawing for V2: the game can draw the skater, goalie and puck from those sprite sheets
+  (`src/browser/sprites.js` loads them, `src/core/sprites.js` checks `sprites.json` and picks the frame and
+  pose), with the V1 shapes as the fallback when the sheets are missing or broken. `?sprites=off` keeps the
+  shapes. 11 new tests (`tests/unit/sprites.test.js`). Not switched on yet: the sheets still have to be rendered.
+- A test for switching sprites on (`tests/unit/sprite-assets.test.js`, 6 tests): when `index.html` sets
+  `data-sprite-manifest`, the manifest must exist and pass `validateSpriteManifest()`, and every PNG must exist
+  and be at least `columns` x `cell_size_px` wide and `rows` x `cell_size_px` tall. It passes while sprites are off.
+- The first Playwright browser test, `tests/e2e/smoke.spec.js` (`npm run test:smoke`, not part of `npm test`):
+  the page loads, Play starts an attempt and a shot resolves, with no console errors.
+- Docs: `docs/sprites.md` for the sprite feature, my study notes on the Blender script
+  (`docs/learning/blender-sprites-notes.md`), and feature branches in `docs/releases.md`.
+
 ## [1.0.0] - 2026-11-04
 
 V1, vector: the first version I release as a download. The skater, goalie and puck are drawn with
