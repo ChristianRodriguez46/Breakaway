@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "sheets": {
+    "skater": {
+      "file": "skater.png",
+      "cell_size_ft": 5.0,
+      "cell_size_px": 128,
+      "columns": 8,
+      "rows": 1,
+      "frame_count": 8,
+      "stride_length_ft": 7.0,
+      "hand_ft": [
+        {
+          "x": 1.064,
+          "y": 0.75
+        },
+        {
+          "x": 0.985,
+          "y": 0.851
+        },
+        {
+          "x": 0.949,
+          "y": 0.891
+        },
+        {
+          "x": 0.985,
+          "y": 0.851
+        },
+        {
+          "x": 1.064,
+          "y": 0.75
+        },
+        {
+          "x": 1.132,
+          "y": 0.641
+        },
+        {
+          "x": 1.158,
+          "y": 0.595
+        },
+        {
+          "x": 1.132,
+          "y": 0.641
+        }
+      ]
+    },
+    "goalie": {
+      "file": "goalie.png",
+      "cell_size_ft": 8.0,
+      "cell_size_px": 192,
+      "columns": 5,
+      "rows": 1,
+      "side_pose_y": 1,
+      "poses": {
+        "stance": {
+          "index": 0,
+          "reach_ft": 1.8
+        },
+        "butterfly": {
+          "index": 1,
+          "reach_ft": 2.3
+        },
+        "poke": {
+          "index": 2,
+          "reach_ft": 1.8
+        },
+        "lean": {
+          "index": 3,
+          "reach_ft": 1.8
+        },
+        "dive": {
+          "index": 4,
+          "reach_ft": 3.6
+        }
+      }
+    },
+    "puck": {
+      "file": "puck.png",
+      "cell_size_ft": 1.5,
+      "cell_size_px": 48,
+      "columns": 1,
+      "rows": 1
+    }
+  }
+}

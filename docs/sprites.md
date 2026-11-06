@@ -137,7 +137,7 @@ The game's side (`src/core/constants.js`):
 
 ## Switching it on and off
 
-- **On:** the game root in `index.html`, `<main id="main" ...>`, gets a `data-sprite-manifest` attribute with the manifest's path, for example `data-sprite-manifest="assets/sprites/sprites.json"`. The path is relative to the page.
+- **On (now):** the game root in `index.html`, `<main id="main" ...>`, has `data-sprite-manifest="assets/sprites/sprites.json"`. The path is relative to the page. The sheets in `assets/sprites/` are the ones I rendered with Blender 5.2 LTS.
 - **Off for the site:** remove the attribute. The game draws shapes and never asks for the files.
 - **Off for one visit:** add `?sprites=off` to the address. This also works for comparing the two looks side by side.
 
@@ -179,7 +179,7 @@ It writes `skater.png`, `goalie.png`, `puck.png` and `sprites.json` in that fold
 | Check | Tests | What it checks |
 |---|---|---|
 | `tests/unit/sprites.test.js` | 11 | Runs in `npm run test:browser`. (1) `validateSpriteManifest` accepts the script's output and returns camelCase names. (2) It returns `null` for junk without throwing. (3) It rejects file names with folders, other file types or capitals. (4) It rejects out-of-range sizes, indexes and hand points. (5) `getCellRect` walks the grid left to right, then down. (6) `getSkaterFrame` follows the distance skated and shows the glide frame when slow. (7) `getGoaliePose` covers every goalie mode, with stance as the fallback. (8) `getGoalieFacingRad` points from the net to the puck. (9) `getGoalieMirror` flips dives and leans to the side they go and never flips other poses. (10) `getGoalieSpriteScale` makes the drawn pads as wide as the shapes' pads. (11) `isSpritesParamOff` reads only `?sprites=off` |
-| `tests/unit/sprite-assets.test.js` | 6 | When `index.html` switches sprites on, the manifest file exists, passes `validateSpriteManifest`, and every PNG it names exists and is at least `columns × cell_size_px` wide and `rows × cell_size_px` tall, read from the PNG header. That test is the one on the real repo; while sprites are off in `index.html`, it passes. The checker is `checkSpriteAssets(rootDir)` in `tests/helpers/sprite-assets.js`. The other five tests run it on temporary folders: a valid set, the attribute absent, a missing, broken or invalid manifest, missing, too-small or non-PNG files, and bad paths. `npm run test:browser` runs this file too |
+| `tests/unit/sprite-assets.test.js` | 6 | When `index.html` switches sprites on, the manifest file exists, passes `validateSpriteManifest`, and every PNG it names exists and is at least `columns × cell_size_px` wide and `rows × cell_size_px` tall, read from the PNG header. That test is the one on the real repo, so it checks the sheets in `assets/sprites/`; if I ever remove the attribute, it passes without checking anything. The checker is `checkSpriteAssets(rootDir)` in `tests/helpers/sprite-assets.js`. The other five tests run it on temporary folders: a valid set, the attribute absent, a missing, broken or invalid manifest, missing, too-small or non-PNG files, and bad paths. `npm run test:browser` runs this file too |
 | By hand in a browser | | With stand-in sheets (see below) |
 | By hand in Blender | | A real render on my laptop |
 
@@ -208,5 +208,6 @@ npm test
 
 - 2026-11-05: Wrote this page: the Blender script, the loader, the rules in `src/core/sprites.js`, the renderer's sprite drawing, `sprites.json`, the settings, switching on and off, troubleshooting and tests.
 - 2026-11-05: Added `tests/unit/sprite-assets.test.js`, which checks the sheets and manifest whenever `index.html` switches sprites on.
+- 2026-11-05: Switched sprites on: `index.html` points at `assets/sprites/sprites.json`, with the sheets from my second Blender 5.2 render.
 - 2026-11-05: After the first real render: `clean_alpha()` removes the faint gray square the shadow catcher left around each player, and the puck's specular is lowered so it renders black instead of gray.
 - 2026-11-05: The script runs from Blender's Text Editor too (`script_file()`, the default output folder, switching away from `bk_sprites` before re-running), sets the image `media_type` that Blender 5.0 added, and names Blender 5.2 LTS as the version I render with.
